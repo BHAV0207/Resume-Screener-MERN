@@ -1,0 +1,59 @@
+{
+  "skills": [
+    "JavaScript", "TypeScript", "Python", "Java", "C", "C++", "C#",
+    "Go", "Rust", "Swift", "Kotlin", "Dart", "Ruby", "PHP", "Perl",
+    "R", "Scala", "Haskell", "Lua", "Shell Scripting", "Bash",
+    
+    "HTML", "CSS", "SASS", "Tailwind CSS", "Bootstrap",
+    "React", "Angular", "Vue.js", "Next.js", "Svelte",
+    "Node.js", "Express.js", "NestJS", "Django", "Flask",
+    "Spring Boot", "ASP.NET", "FastAPI", "GraphQL",
+    
+    "MongoDB", "MySQL", "PostgreSQL", "SQLite", "Redis", "Elasticsearch",
+    "MariaDB", "Cassandra", "Firebase", "DynamoDB", "Neo4j",
+    
+    "Docker", "Kubernetes", "Terraform", "Ansible", "Jenkins",
+    "Git", "GitHub", "GitLab", "Bitbucket", "CI/CD",
+    
+    "Linux", "Unix", "Windows Server", "PowerShell",
+    "Cloud Computing", "AWS", "Azure", "Google Cloud", "Heroku",
+    
+    "Cybersecurity", "Ethical Hacking", "Penetration Testing", 
+    "Cryptography", "Firewalls", "Network Security", "OWASP",
+    
+    "Machine Learning", "Deep Learning", "AI", "NLP",
+    "Computer Vision", "Data Science", "Data Engineering",
+    "Big Data", "Hadoop", "Spark", "Kafka",
+    
+    "TensorFlow", "PyTorch", "Scikit-learn", "OpenCV",
+    "Matplotlib", "Pandas", "NumPy", "Seaborn",
+    
+    "Agile Methodologies", "Scrum", "Kanban",
+    "Software Architecture", "Microservices",
+    
+    "Blockchain", "Ethereum", "Solidity", "Smart Contracts",
+    "Cryptocurrency", "DeFi",
+    
+    "WebSockets", "REST API", "SOAP API", "OAuth",
+    "JWT Authentication", "Session Management",
+    
+    "Game Development", "Unity", "Unreal Engine", "Godot",
+    "AR/VR", "3D Graphics", "Shader Programming",
+    
+    "Quantum Computing", "Parallel Computing", "High-Performance Computing",
+    
+    "Embedded Systems", "IoT", "Arduino", "Raspberry Pi",
+    
+    "Mobile App Development", "Flutter", "React Native", "SwiftUI",
+    
+    "Test Automation", "Selenium", "Jest", "Cypress", "Mocha",
+    
+    "Performance Optimization", "Profiling", "Load Testing",
+    
+    "API Development", "Serverless Computing", "GraphQL",
+    
+    "Software Testing", "Unit Testing", "Integration Testing",
+    
+    "No-Code/Low-Code Development", "Bubble", "Webflow"
+  ]
+}
