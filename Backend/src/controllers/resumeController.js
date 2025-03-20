@@ -9,7 +9,7 @@ const uplaodResume = async (req, res) => {
     }
 
     const data = await pdfParse(req.file.buffer);
-    const parsedText = data.text.toLowerCase();
+    const parsedText = JSON.stringify(data.text.toLowerCase());
 
     const nlpResponse = await axios.post(
       "http://localhost:8000/extract-skills/",
@@ -40,3 +40,5 @@ const uplaodResume = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+module.exports = {uplaodResume};

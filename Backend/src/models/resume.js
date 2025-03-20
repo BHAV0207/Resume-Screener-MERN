@@ -9,3 +9,5 @@ const ResumeSchema = new mongoose.Schema({
   parsedText: String,
   createdAt: { type: Date, default: Date.now },
 })
+
+module.exports = mongoose.model("Resume" ,ResumeSchema)
