@@ -1,12 +1,22 @@
 const express = require("express");
-const { createJob} = require("../controllers/jobController");
+const { 
+  createJob, 
+  getAllJobs, 
+  getJobById, 
+  updateJob, 
+  deleteJob, 
+  rankResumesForJob 
+} = require("../controllers/jobController");
 
 const router = express.Router();
 
-// Route to create a job
-router.post("/create", createJob);
-
-// Route to rank resumes for a job
-// router.get("/:jobId/rank-resumes", rankResumesForJob);
+// Job CRUD Operations
+router.post("/create", createJob);         
+router.get("/", getAllJobs);      
+router.get("/:jobId", getJobById);         
+router.put("/:jobId", updateJob);
+router.delete("/:jobId", deleteJob);       
+// Resume Ranking
+router.get("/:jobId/rank-resumes", rankResumesForJob);
 
 module.exports = router;
