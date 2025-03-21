@@ -36,9 +36,9 @@ const createJob = async (req, res) => {
 
 const getAllJobsByAdmin = async (req, res) => {
   try {
-    const { createdBy } = req.params; 
+    const { createdBy } = req.params;
 
-    const jobs = await Job.find({ createdBy: createdBy }); 
+    const jobs = await Job.find({ createdBy: createdBy });
 
     if (!jobs || jobs.length === 0) {
       return res.status(404).json({ error: "No jobs found for this Admin" });
@@ -50,7 +50,6 @@ const getAllJobsByAdmin = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 const getAllJobs = async (req, res) => {
   try {
@@ -139,15 +138,14 @@ const processCandidate = async (req, res) => {
 const rankResumesForJob = async (req, res) => {
   try {
     const jobId = req.params.jobId;
-    
+
     // Find the job and populate the resumes
-    const job = await Job.findById(jobId)
+    const job = await Job.findById(jobId).populate("resumes");
 
     if (!job) {
       return res.status(404).json({ error: "Job not found" });
     }
 
-    // Get only the resumes linked to this job
     const resumes = job.resumes;
 
     if (!resumes.length) {
@@ -158,26 +156,29 @@ const rankResumesForJob = async (req, res) => {
     let rankedResumes = resumes.map((resume) => {
       let skillMatches = 0;
       let experienceScore = 0;
+      let finalScore = 0;
 
       // Compare each required skill to resume skills
       job.requiredSkills.forEach((jobSkill) => {
         const match = stringSimilarity.findBestMatch(jobSkill, resume.skills);
         if (match.bestMatch.rating > 0.7) {
-          // 70% match threshold
           skillMatches++;
         }
       });
 
-      // Experience Score
-      if (resume.experience >= job.minExperience) {
-        experienceScore =
-          Math.min(resume.experience / job.minExperience, 1) * 10;
+      // Experience Score Calculation (Avoid undefined values)
+      if (resume.minExperience) {
+        if (resume.experience >= job.minExperience) {
+          experienceScore = Math.min(resume.experience / job.minExperience, 1) * 10;
+        }
       }
+      // Final Score Calculation (Avoid division by zero)
+      let skillScore =
+        job.requiredSkills.length > 0
+          ? (skillMatches / job.requiredSkills.length) * 70
+          : 0;
 
-      // Final Score (70% skills, 30% experience)
-      let finalScore =
-        (skillMatches / job.requiredSkills.length) * 70 + experienceScore * 0.3;
-
+      finalScore = skillScore + experienceScore * 0.3;
       return { resume, skillMatches, experienceScore, finalScore };
     });
 
@@ -191,7 +192,6 @@ const rankResumesForJob = async (req, res) => {
   }
 };
 
-
 module.exports = {
   createJob,
   getAllJobs,
@@ -200,5 +200,5 @@ module.exports = {
   deleteJob,
   rankResumesForJob,
   processCandidate,
-  getAllJobsByAdmin
+  getAllJobsByAdmin,
 };
