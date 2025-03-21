@@ -16,6 +16,7 @@ connectDB();
 // Routes
 app.use("/api/resumes", require("./src/routes/resumeRoutes"));
 app.use("/api/jobs" , require("./src/routes/jobRoutes"))
+app.use("/api/user" , require("./src/routes/authRoutes"))
 
 // Start Server
 const PORT = process.env.PORT || 5000;
