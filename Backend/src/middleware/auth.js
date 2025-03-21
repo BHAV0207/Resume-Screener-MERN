@@ -14,6 +14,12 @@ const authenticateJWT = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // Attach user info to request
+
+    // Check if user type is 'admin'
+    if (decoded.type !== "admin") {
+      return res.status(403).json({ message: "User not allowed to do the following action" });
+    }
+
     next();
   } catch (err) {
     return res.status(403).json({ message: "Invalid or expired token" });
