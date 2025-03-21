@@ -5,7 +5,8 @@ const {
   getJobById, 
   updateJob, 
   deleteJob, 
-  rankResumesForJob 
+  rankResumesForJob,
+  processCandidate
 } = require("../controllers/jobController");
 
 const router = express.Router();
@@ -18,5 +19,7 @@ router.put("/:jobId", updateJob);
 router.delete("/:jobId", deleteJob);       
 // Resume Ranking
 router.get("/:jobId/rank-resumes", rankResumesForJob);
+router.post("/process", processCandidate); // Shortlist or reject candidates
+
 
 module.exports = router;
