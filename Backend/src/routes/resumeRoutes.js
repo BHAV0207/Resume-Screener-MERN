@@ -1,6 +1,7 @@
 const express = require("express");
 const { uploadResume } = require("../controllers/resumeController");
 const multer = require("multer");
+const { authenticateJwtUser } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -8,6 +9,6 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-router.post("/upload", upload.single("resume"), uploadResume);
+router.post("/upload", upload.single("resume"), authenticateJwtUser,uploadResume);
 
 module.exports = router;

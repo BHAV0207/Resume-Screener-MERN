@@ -4,7 +4,7 @@ const stringSimilarity = require("string-similarity");
 const Resume = require("../models/resume");
 const Job = require("../models/job"); // Import the Job model
 const skillData = require("../data/skills.json"); // Predefined skills list
-
+const User = require("../models/user")
 const uploadResume = async (req, res) => {
   try {
     if (!req.file) {
@@ -12,6 +12,12 @@ const uploadResume = async (req, res) => {
     }
 
     const { name, email, jobId } = req.body; // Extract jobId from request body
+    const userID =  req.user.userId
+
+    const user = await User.findById(userID);
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
 
     // Validate jobId
     if (!jobId) {
@@ -23,6 +29,9 @@ const uploadResume = async (req, res) => {
     if (!job) {
       return res.status(404).json({ error: "Job not found" });
     }
+
+    user.appliedJobs.push(jobId)
+    await user.save();
 
     // Extract text from PDF and convert to lowercase
     const data = await pdfParse(req.file.buffer);
