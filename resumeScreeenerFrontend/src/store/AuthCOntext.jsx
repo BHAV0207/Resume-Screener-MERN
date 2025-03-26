@@ -64,11 +64,16 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
+      setTimeout(() => {
+        setSuccess("");
+      }, 3000);
+
       if (res.data.user.type === "admin") {
         navigate("/admin");
       } else {
         navigate("/user");
       }
+      
     } catch (err) {
       setErr("Failed to login");
       setSuccess("");

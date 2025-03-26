@@ -2,34 +2,31 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
-function ProtectedRoute({element}) {
-
+function ProtectedRoute({role,  element }) {
   const token = localStorage.getItem("token");
-  if (!token) return <Navigate to={"/"} replace />;
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+
+  if (!token) {
+    return <Navigate to="/" replace />;
+  }
+
+  console.log("got token")
 
   try {
-    const decode = jwtDecode(token);
-    let storedUser = JSON.parse(localStorage.getItem("user"));
-
-
-    console.log(decode)
-    console.log(storedUser)
-    if (storedUser === null) {
-      console.log("null")
-      if (storedUser.id !== decode.userId) {
-        return <Navigate to={"/"} replace />;
-      }
+    const decoded = jwtDecode(token);
+    console.log(decoded)
+    // Check if stored user ID matches token
+    if (decoded.type !== role) {
+      localStorage.clear();
+      return <Navigate to="/" replace />;
     }
-    else if (decode.userId !== storedUser.id) {
-      console.log("going indide else if")
-      return <Navigate to={"/"} replace />;
-    }
-    console.log("ele")
+
     return element;
   } catch (err) {
-    console.log(err)
-    console.log("User catch in");
+    console.error("JWT Decode failed", err);
+    localStorage.clear();
+    return <Navigate to="/" replace />;
   }
 }
 
-export default ProtectedRoute
+export default ProtectedRoute;
