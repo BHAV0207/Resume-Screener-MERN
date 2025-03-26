@@ -22,12 +22,6 @@ export const AuthProvider = ({ children }) => {
         );
         return;
       }
-
-      console.log(name);
-      console.log(email);
-      console.log(password);
-      console.log(type);
-
       const res = await axios.post("http://localhost:5000/api/user/register", {
         name,
         email,
@@ -37,15 +31,14 @@ export const AuthProvider = ({ children }) => {
 
       setSuccess("Registration successful!");
       setErr("");
-
-      setTimeout(() => {
-        setSuccess("");
-      }, 3000);
-
       setName("");
       setEmail("");
       setType("");
       setPassword("");
+
+      setTimeout(() => {
+        setSuccess("");
+      }, 3000);
     } catch (err) {
       setErr("Registration failed. Please try again.");
       setSuccess("");
@@ -56,12 +49,41 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  
+  const AxiosLogin = async (navigate) => {
+    try {
+      const res = await axios.post("http://localhost:5000/api/user/login", {
+        email,
+        password,
+      });
+
+      setSuccess("Login successful!");
+      setErr("");
+      setEmail("");
+      setPassword("");
+
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      if (res.data.user.type === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/user");
+      }
+    } catch (err) {
+      setErr("Failed to login");
+      setSuccess("");
+
+      setTimeout(() => {
+        setErr("");
+      }, 3000);
+    }
+  };
 
   return (
     <AuthContext.Provider
       value={{
         AxiosRegister,
+        AxiosLogin,
         success,
         err,
         name,
@@ -78,4 +100,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-

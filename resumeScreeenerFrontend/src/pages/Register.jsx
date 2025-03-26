@@ -1,7 +1,9 @@
 import React, { useContext } from "react";
 import { AuthContext } from "../store/AuthCOntext";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
+  const navigate = useNavigate();
   const {
     AxiosRegister,
     name,
@@ -90,6 +92,15 @@ function Register() {
             {err}
           </div>
         )}
+        <div className="mt-4 text-center">
+          <span className="text-gray-600">Don’t have an account?</span>
+          <button
+            onClick={() => navigate("/login")}
+            className="ml-2 text-blue-500 hover:underline font-medium"
+          >
+            Login
+          </button>
+        </div>
       </div>
     </div>
   );
