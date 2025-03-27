@@ -10,8 +10,6 @@ function ProtectedRoute({role,  element }) {
     return <Navigate to="/" replace />;
   }
 
-  console.log("got token")
-
   try {
     const decoded = jwtDecode(token);
     console.log(decoded)
