@@ -5,23 +5,30 @@ function LandingHeader() {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-green-300 h-[8vh] flex items-center justify-between px-8 shadow-md">
-      <div className="text-2xl font-bold text-white">Job Junction</div>
-      <div className="space-x-4">
-        <button
-          onClick={() => navigate('/login')}
-          className="bg-white text-green-500 px-4 py-1 rounded hover:bg-green-100 transition duration-200"
-        >
-          Login
-        </button>
-        <button
-          onClick={() => navigate('/register')}
-          className="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600 transition duration-200"
-        >
-          Sign Up
-        </button>
+    <header className="bg-white shadow-md fixed w-full top-0 left-0 z-50">
+      <div className="max-w-full mx-auto flex justify-between items-center px-6 md:px-12 py-4">
+        {/* Logo */}
+        <div className="text-2xl font-semibold tracking-wide text-gray-900">
+          Job Junction
+        </div>
+
+        {/* Navigation */}
+        <div className="space-x-6 hidden md:flex">
+          <button
+            onClick={() => navigate('/login')}
+            className="text-gray-700 font-medium hover:text-gray-900 transition duration-200"
+          >
+            Login
+          </button>
+          <button
+            onClick={() => navigate('/register')}
+            className="bg-gray-900 text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition duration-200 shadow-lg"
+          >
+            Sign Up
+          </button>
+        </div>
       </div>
-    </div>
+    </header>
   );
 }
 
