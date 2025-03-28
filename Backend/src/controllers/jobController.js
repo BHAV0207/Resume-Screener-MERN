@@ -34,13 +34,22 @@ const createJob = async (req, res) => {
   }
 };
 
+
 const getAllJobsByAdmin = async (req, res) => {
   try {
     const { createdBy } = req.params;
+    const { active } = req.query;
 
-    const jobs = await Job.find({ createdBy: createdBy });
+    const isActive = active !== undefined ? active === "true" : undefined;
 
-    if (!jobs || jobs.length === 0) {
+    const filter = { createdBy: createdBy };
+    if (isActive !== undefined) {
+        filter.active = isActive;
+    }
+
+     const jobs = await Job.find(filter).populate("resumes").lean();
+
+    if (jobs.length === 0) {
       return res.status(404).json({ error: "No jobs found for this Admin" });
     }
 
@@ -75,7 +84,7 @@ const getJobById = async (req, res) => {
 
 const updateJob = async (req, res) => {
   try {
-    const { title, description, requiredSkills, minExperience } = req.body;
+    const { title, description, requiredSkills, minExperience , active} = req.body;
     const job = await Job.findById(req.params.jobId);
 
     if (!job) return res.status(404).json({ error: "Job not found" });
@@ -86,6 +95,7 @@ const updateJob = async (req, res) => {
       ? requiredSkills.map((skill) => skill.toLowerCase())
       : job.requiredSkills;
     job.minExperience = minExperience || job.minExperience;
+    if (active !== undefined) job.active = active;
 
     await job.save();
     res.status(200).json({ message: "Job updated successfully", job });

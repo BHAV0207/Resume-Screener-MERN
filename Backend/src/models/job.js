@@ -3,9 +3,10 @@ const mongoose = require("mongoose");
 const JobSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
-    requiredSkills: [String],
-    minExperience: Number,
+    requiredSkills: { type: [String], default: [] },
+    minExperience: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
+    active: { type: Boolean, default:true , index: true },
     resumes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Resume" }], // Reference to resumes
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Reference to admin
 });

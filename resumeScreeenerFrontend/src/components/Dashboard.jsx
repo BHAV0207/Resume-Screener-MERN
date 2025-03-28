@@ -1,10 +1,11 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import axios from "axios";
 import {
   BarChart as BarChartIcon,
   Users,
   Briefcase,
   UserCheck,
-  Bell
+  Bell,
 } from "lucide-react";
 import {
   BarChart,
@@ -21,20 +22,20 @@ import {
 import { ThemeContext } from "../store/ThemeContext";
 
 const Dashboard = () => {
-  const { setIsDarkMode, isDarkMode } = useContext(ThemeContext);
+  const { isDarkMode } = useContext(ThemeContext);
 
   // Sample data for charts
   const applicationData = [
-    { name: "Frontend Dev", applications: 45 },
+    { name: "Frontend Dev", applications: 55 },
     { name: "Backend Dev", applications: 32 },
     { name: "UI Designer", applications: 28 },
     { name: "DevOps", applications: 15 },
   ];
 
   const experienceData = [
-    { name: "Junior", value: 40 },
+    { name: "Junior", value: 60 },
     { name: "Mid-Level", value: 35 },
-    { name: "Senior", value: 25 },
+    { name: "Senior", value: 5 },
   ];
 
   const COLORS = ["#4F46E5", "#10B981", "#F59E0B"];
@@ -68,27 +69,73 @@ const Dashboard = () => {
     { id: 3, title: "UI/UX Designer", status: "Closed", date: "2024-03-10" },
   ];
 
+  const [totalJobs, setTotalJobs] = useState(null);
+  const [activeJobs, setActiveJobs] = useState(null);
+
+  const handleJobCount = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Token not found in localStorage");
+        return;
+      }
+
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user?.id) {
+        console.error("User ID not found in localStorage");
+        return;
+      }
+
+      const response = await axios.get(
+        `http://localhost:5000/api/jobs/${user.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass token in headers
+          },
+        }
+      );
+
+      const res = await axios.get(
+        `http://localhost:5000/api/jobs/${user.id}?active=true`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass token in headers
+          },
+        }
+      );
+
+      const activeJobsCount = res.data.length;
+      const jobCount = response.data.length;
+      setTotalJobs(jobCount);
+      setActiveJobs(activeJobsCount)
+    } catch (err) {
+      console.error("Error fetching job count:", err);
+    }
+  };
+
+  useEffect(() => {
+    handleJobCount()
+  } ,[])
+
   return (
     <div
-      className={`px-5 transition-colors duration-200 ${
+      className={`px-5 py-3 transition-colors duration-200 ${
         isDarkMode ? "dark bg-gray-900" : "bg-gray-50"
       }`}
     >
-    
-
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
           icon={<Briefcase className="h-6 w-6 text-indigo-600" />}
           title="Total Jobs Posted"
-          value="124"
+          value={totalJobs}
           trend="+12%"
           isDark={isDarkMode}
         />
         <StatCard
           icon={<BarChartIcon className="h-6 w-6 text-green-600" />}
           title="Active Jobs"
-          value="45"
+          value={activeJobs}
           trend="+5%"
           isDark={isDarkMode}
         />
