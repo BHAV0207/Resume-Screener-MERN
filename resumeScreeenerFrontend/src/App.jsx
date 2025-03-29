@@ -10,6 +10,7 @@ import PostJobs from "./components/PostJobs";
 import PostedJobs from "./components/PostedJobs";
 import AllResumes from "./components/AllResumes";
 import UserPage from "./pages/UserPage";
+import ActiveJobs from "./components/ActiveJobs";
 
 
 function App() {
@@ -32,6 +33,8 @@ function App() {
           <Route path="post-jobs" element={<PostJobs />} />
           <Route path="posted-jobs" element={<PostedJobs />} />
           <Route path="all-resumes" element={<AllResumes />} />
+          <Route path="active-jobs" element={<ActiveJobs />} />
+
         </Route>
 
         {/* User Routes */}

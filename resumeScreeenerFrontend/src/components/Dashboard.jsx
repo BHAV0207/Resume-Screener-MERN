@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import axios from "axios";
+import React, { useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   BarChart as BarChartIcon,
   Users,
@@ -20,9 +20,13 @@ import {
   Cell,
 } from "recharts";
 import { ThemeContext } from "../store/ThemeContext";
+import { JobContext } from "../store/JobContext";
 
 const Dashboard = () => {
   const { isDarkMode } = useContext(ThemeContext);
+  const { setActiveJobs, setTotalJobs, totalJobs, activeJobs , handleJobCount} = useContext(JobContext)
+  const navigate = useNavigate();
+
 
   // Sample data for charts
   const applicationData = [
@@ -67,55 +71,11 @@ const Dashboard = () => {
     },
     { id: 2, title: "Backend Engineer", status: "Active", date: "2024-03-14" },
     { id: 3, title: "UI/UX Designer", status: "Closed", date: "2024-03-10" },
-  ];
-
-  const [totalJobs, setTotalJobs] = useState(null);
-  const [activeJobs, setActiveJobs] = useState(null);
-
-  const handleJobCount = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("Token not found in localStorage");
-        return;
-      }
-
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user?.id) {
-        console.error("User ID not found in localStorage");
-        return;
-      }
-
-      const response = await axios.get(
-        `http://localhost:5000/api/jobs/${user.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Pass token in headers
-          },
-        }
-      );
-
-      const res = await axios.get(
-        `http://localhost:5000/api/jobs/${user.id}?active=true`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Pass token in headers
-          },
-        }
-      );
-
-      const activeJobsCount = res.data.length;
-      const jobCount = response.data.length;
-      setTotalJobs(jobCount);
-      setActiveJobs(activeJobsCount)
-    } catch (err) {
-      console.error("Error fetching job count:", err);
-    }
-  };
+  ];  
 
   useEffect(() => {
-    handleJobCount()
-  } ,[])
+    handleJobCount();
+  }, []);
 
   return (
     <div
@@ -125,20 +85,24 @@ const Dashboard = () => {
     >
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard
-          icon={<Briefcase className="h-6 w-6 text-indigo-600" />}
-          title="Total Jobs Posted"
-          value={totalJobs}
-          trend="+12%"
-          isDark={isDarkMode}
-        />
+        <div onClick={() => navigate("/admin/posted-jobs")} className="cursor-pointer">
+          <StatCard
+            icon={<Briefcase className="h-6 w-6 text-indigo-600" />}
+            title="Total Jobs Posted"
+            value={totalJobs?.length}
+            trend="+12%"
+            isDark={isDarkMode}
+          />
+        </div>
+        <div onClick={() => navigate("/admin/active-jobs")} className="cursor-pointer">
         <StatCard
           icon={<BarChartIcon className="h-6 w-6 text-green-600" />}
           title="Active Jobs"
-          value={activeJobs}
+          value={activeJobs?.length}
           trend="+5%"
           isDark={isDarkMode}
         />
+        </div>
         <StatCard
           icon={<Users className="h-6 w-6 text-blue-600" />}
           title="Total Resumes"

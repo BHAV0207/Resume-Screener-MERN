@@ -82,6 +82,15 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
             isOpen={isOpen}
             isDarkMode={isDarkMode}
           />
+          
+          <NavItem
+            icon={<Briefcase size={20} />}
+            text="Active Jobs"
+            route="/admin/active-jobs"
+            isOpen={isOpen}
+            isDarkMode={isDarkMode}
+          />
+
           <NavItem
             icon={<FileText size={20} />}
             text="All Resumes"
