@@ -35,6 +35,13 @@ const Dashboard = () => {
   } = useContext(JobContext);
   const navigate = useNavigate();
 
+
+  useEffect(() => {
+    handleJobCount();
+    handleResumesCount();
+    shortlistedResumes();
+  }, []);
+
   // Sample data for charts
   const applicationData = [
     { name: "Frontend Dev", applications: 55 },
@@ -43,13 +50,35 @@ const Dashboard = () => {
     { name: "DevOps", applications: 15 },
   ];
 
-  const experienceData = [
-    { name: "Junior", value: 60 },
-    { name: "Mid-Level", value: 35 },
-    { name: "Senior", value: 5 },
-  ];
-
   const COLORS = ["#4F46E5", "#10B981", "#F59E0B"];
+
+  const experienceCategories = {
+    Beginner: 0,
+    Veteran: 0,
+    Expert: 0,
+  };
+
+  if (totalJobs && Array.isArray(totalJobs)) {
+    totalJobs.forEach((job) => {
+      if (job.resumes && Array.isArray(job.resumes)) {
+        job.resumes.forEach((resume) => {
+          const exp = resume.experience || 0;
+          if (exp < 1) experienceCategories.Beginner++;
+          else if (exp >= 1 && exp < 5) experienceCategories.Veteran++;
+          else experienceCategories.Expert++;
+        });
+      }
+    });
+  }
+  const totalResumes = Object.values(experienceCategories).reduce((a, b) => a + b, 0) || 1;
+
+  const chartData = Object.entries(experienceCategories).map(([name, count]) => ({
+    name,
+    value: parseFloat(((count / totalResumes) * 100).toFixed(1)), // Convert to number
+  }));
+  
+  console.log(chartData )
+  
 
   const notifications = [
     {
@@ -69,22 +98,7 @@ const Dashboard = () => {
     },
   ];
 
-  const recentJobs = [
-    {
-      id: 1,
-      title: "Senior Frontend Developer",
-      status: "Active",
-      date: "2024-03-15",
-    },
-    { id: 2, title: "Backend Engineer", status: "Active", date: "2024-03-14" },
-    { id: 3, title: "UI/UX Designer", status: "Closed", date: "2024-03-10" },
-  ];
-
-  useEffect(() => {
-    handleJobCount();
-    handleResumesCount();
-    shortlistedResumes();
-  }, []);
+ 
 
   return (
     <div
@@ -187,25 +201,23 @@ const Dashboard = () => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={experienceData}
+                  data={chartData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) =>
-                    `${name} ${(percent * 100).toFixed(0)}%`
-                  }
+                  label={({ name, value }) => `${name}: ${value}%`}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {experienceData.map((entry, index) => (
+                  {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}
                     />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip formatter={(value) => `${value}%`} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -241,21 +253,23 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className={isDarkMode ? "text-gray-300" : "text-gray-700"}>
-                {recentJobs.map((job) => (
-                  <tr key={job.id}>
+                {totalJobs?.map((job) => (
+                  <tr key={job._id}>
                     <td className="py-2">{job.title}</td>
                     <td className="py-2">
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${
-                          job.status === "Active"
+                          job.active === true
                             ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                             : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
                         }`}
                       >
-                        {job.status}
+                        {job.active ? "Active" : "Closed"}
                       </span>
                     </td>
-                    <td className="py-2">{job.date}</td>
+                    <td className="py-2">
+                      {new Date(job.createdAt).toLocaleDateString()}
+                    </td>
                   </tr>
                 ))}
               </tbody>

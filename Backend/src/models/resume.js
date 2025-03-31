@@ -4,7 +4,7 @@ const ResumeSchema = new mongoose.Schema({
   name:String,
   email: String,
   skills: [String],
-  experience: Number,
+  experience:{type: Number, default: 0},
   jobMatchScore: Number,
   parsedText: String,
   status:{type: String , enum:["evaluation" , "rejected" , "shortlisted"] , default:"evaluation"},

@@ -35,6 +35,38 @@ const extractedSkillsWithLLM = async (parsedText) => {
   }
 };
 
+const extractExperienceWithLLM = async (parsedText) => {
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+    const prompt = `
+    Extract the years of experience from the resume text. 
+    Provide ONLY a JSON response in this format: 
+    { "experience": number }.
+    
+    Resume Text: "${parsedText}"
+  `;
+
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+
+    // Extract JSON from response
+    const jsonMatch = responseText.match(/\{.*\}/s);
+    if (!jsonMatch) {
+      throw new Error("Invalid JSON response from Gemini API");
+    }
+
+    const experience = JSON.parse(jsonMatch[0]).experience;
+
+    // Ensure it is always a valid number
+    return typeof experience === "number" && experience >= 0 ? experience : 0;
+  } catch (error) {
+    console.error("LLM Experience Extraction Error:", error);
+    return 0; // Default to 0 if there's an error
+  }
+};
+
+
 const uploadResume = async (req, res) => {
   try {
     if (!req.file) {
@@ -70,12 +102,14 @@ const uploadResume = async (req, res) => {
 
     // Extract skills using Gemini LLM
     const extractedSkills = await extractedSkillsWithLLM(parsedText);
+    const extractedExperience = await extractExperienceWithLLM(parsedText);
 
     // Save Resume
     const newResume = new Resume({
       name: name || "Unknown",
       email: email || "No Email",
       skills: extractedSkills,
+      experience:extractedExperience || 0,
       parsedText,
     });
 

@@ -45,6 +45,8 @@ export const JobProvider = ({ children }) => {
       const activeJobsCount = res.data;
       const jobCount = response.data;
 
+      console.log(jobCount)
+
       setTotalJobs(jobCount);
       setActiveJobs(activeJobsCount);
     } catch (err) {

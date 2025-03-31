@@ -9,8 +9,10 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const PostedJobs = () => {
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -52,13 +54,13 @@ const PostedJobs = () => {
   const paginatedJobs = filteredJobs.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6">
+    <div className="bg-white dark:bg-gray-900 shadow-lg p-6 h-[100vh]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-0">
           Posted Jobs
         </h1>
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors">
+        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors" onClick={() => navigate("/admin/post-jobs")}>
           + Post New Job
         </button>
       </div>

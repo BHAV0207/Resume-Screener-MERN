@@ -153,9 +153,9 @@ const AllResumes = () => {
 
   return (
     <div
-      className={`bg-white ${
+      className={`bg-white h-[100vh] ${
         isDarkMode ? "dark:bg-gray-900" : "bg-white"
-      } rounded-lg shadow-lg p-6`}
+      }  shadow-lg p-12`}
     >
       {/* Header */}
       <div className="mb-8">
