@@ -1,7 +1,7 @@
 const express = require("express");
-const { uploadResume } = require("../controllers/resumeController");
+const { uploadResume  ,  shortlistedResumes , updateResume} = require("../controllers/resumeController");
 const multer = require("multer");
-const { authenticateJwtUser } = require("../middleware/auth");
+const { authenticateJwtUser, authenticateJWT } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -10,5 +10,6 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 router.post("/upload", upload.single("resume"), authenticateJwtUser,uploadResume);
-
+router.put("/update/:resumeId" ,  authenticateJWT , updateResume )
+router.get("/shortlisted/:adminId" , shortlistedResumes)
 module.exports = router;

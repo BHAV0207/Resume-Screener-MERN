@@ -95,4 +95,57 @@ const uploadResume = async (req, res) => {
   }
 };
 
-module.exports = { uploadResume };
+const updateResume = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const { resumeId } = req.params;
+
+    if (!status) {
+      return res.status(400).json({ error: "Status is required" });
+    }
+
+    const updatedResume = await Resume.findByIdAndUpdate(
+      resumeId, // Correctly passing resumeId
+      { status }, // Updating only the status field
+      { new: true } // Returns the updated document
+    );
+
+    if (!updatedResume) {
+      return res.status(404).json({ error: "Resume not found" });
+    }
+
+    res.status(200).json({ message: "Resume updated successfully", data: updatedResume });
+  } catch (err) {
+    console.error("Error updating resume:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+ 
+const shortlistedResumes = async (req, res) => {
+  try {
+    const { adminId } = req.params;
+
+    // Step 1: Find job IDs created by the given admin
+    const jobs = await Job.find({ createdBy: adminId }).select("_id resumes");
+
+    // Extract all resume IDs from these jobs
+    const resumeIds = jobs.flatMap(job => job.resumes);
+
+    // Step 2: Find only resumes that are shortlisted
+    const shortlistedResumes = await Resume.find({
+      _id: { $in: resumeIds },
+      status: "shortlisted",
+    });
+
+    res.status(200).json({ shortlistedResumes });
+  } catch (err) {
+    console.error("Error fetching shortlisted resumes:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+
+
+module.exports = { uploadResume , shortlistedResumes , updateResume};
