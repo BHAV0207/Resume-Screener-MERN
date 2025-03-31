@@ -1,7 +1,6 @@
 import { createContext, useState } from "react";
 import axios from "axios";
-import {  Briefcase, Building2, Users2} from 'lucide-react';
-
+import { Briefcase, Building2, Users2 } from "lucide-react";
 
 export const AuthContext = createContext();
 
@@ -12,7 +11,6 @@ export const AuthProvider = ({ children }) => {
   const [type, setType] = useState("");
   const [success, setSuccess] = useState("");
   const [err, setErr] = useState("");
-
 
   const AxiosRegister = async () => {
     try {
@@ -25,12 +23,15 @@ export const AuthProvider = ({ children }) => {
         );
         return;
       }
-      const res = await axios.post("http://localhost:5000/api/user/register", {
-        name,
-        email,
-        password,
-        type,
-      });
+      const res = await axios.post(
+        "https://resume-screener-mern-1.onrender.com/api/user/register",
+        {
+          name,
+          email,
+          password,
+          type,
+        }
+      );
 
       setSuccess("Registration successful!");
       setErr("");
@@ -54,10 +55,13 @@ export const AuthProvider = ({ children }) => {
 
   const AxiosLogin = async (navigate) => {
     try {
-      const res = await axios.post("http://localhost:5000/api/user/login", {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        "https://resume-screener-mern-1.onrender.com/api/user/login",
+        {
+          email,
+          password,
+        }
+      );
 
       setSuccess("Login successful!");
       setErr("");
@@ -76,7 +80,6 @@ export const AuthProvider = ({ children }) => {
       } else {
         navigate("/user");
       }
-      
     } catch (err) {
       setErr("Failed to login");
       setSuccess("");
@@ -91,44 +94,47 @@ export const AuthProvider = ({ children }) => {
     {
       icon: <Users2 className="h-8 w-8 text-indigo-600" />,
       title: "Smart Matching",
-      description: "AI-powered job matching that understands your unique skills and preferences",
+      description:
+        "AI-powered job matching that understands your unique skills and preferences",
       details: [
         "Advanced machine learning algorithms analyze your skills and experience",
         "Real-time matching with new job postings",
         "Personalized job recommendations based on your preferences",
         "Skills gap analysis and suggested learning paths",
-        "Career trajectory predictions based on market trends"
-      ]
+        "Career trajectory predictions based on market trends",
+      ],
     },
     {
       icon: <Building2 className="h-8 w-8 text-indigo-600" />,
       title: "Top Companies",
-      description: "Access opportunities from leading companies across industries",
+      description:
+        "Access opportunities from leading companies across industries",
       details: [
         "Partnerships with Fortune 500 companies",
         "Verified employer profiles and reviews",
         "Exclusive job listings not found elsewhere",
         "Direct communication channels with hiring managers",
-        "Company culture insights and benefits information"
-      ]
+        "Company culture insights and benefits information",
+      ],
     },
     {
       icon: <Briefcase className="h-8 w-8 text-indigo-600" />,
       title: "Career Growth",
-      description: "Resources and tools to help you advance in your career journey",
+      description:
+        "Resources and tools to help you advance in your career journey",
       details: [
         "Professional development workshops and webinars",
         "Resume building and optimization tools",
         "Interview preparation resources",
         "Salary negotiation guides",
-        "Networking opportunities with industry leaders"
-      ]
-    }
+        "Networking opportunities with industry leaders",
+      ],
+    },
   ];
 
   return (
     <AuthContext.Provider
-      value={{  
+      value={{
         AxiosRegister,
         AxiosLogin,
         success,

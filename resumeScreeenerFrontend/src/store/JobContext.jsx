@@ -8,7 +8,7 @@ export const JobProvider = ({ children }) => {
   const [activeJobs, setActiveJobs] = useState(null);
   const [resumes, setResumes] = useState(null);
   const [allResume, setAllResume] = useState([]);
-  const [shortlisted , setShortlisted] = useState([])
+  const [shortlisted, setShortlisted] = useState([]);
 
   const handleJobCount = async () => {
     try {
@@ -25,7 +25,7 @@ export const JobProvider = ({ children }) => {
       }
 
       const response = await axios.get(
-        `http://localhost:5000/api/jobs/${user.id}`,
+        `https://resume-screener-mern-1.onrender.com/api/jobs/${user.id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`, // Pass token in headers
@@ -34,7 +34,7 @@ export const JobProvider = ({ children }) => {
       );
 
       const res = await axios.get(
-        `http://localhost:5000/api/jobs/${user.id}?active=true`,
+        `https://resume-screener-mern-1.onrender.com/api/jobs/${user.id}?active=true`,
         {
           headers: {
             Authorization: `Bearer ${token}`, // Pass token in headers
@@ -45,7 +45,7 @@ export const JobProvider = ({ children }) => {
       const activeJobsCount = res.data;
       const jobCount = response.data;
 
-      console.log(jobCount)
+      console.log(jobCount);
 
       setTotalJobs(jobCount);
       setActiveJobs(activeJobsCount);
@@ -69,7 +69,7 @@ export const JobProvider = ({ children }) => {
       }
 
       const response = await axios.get(
-        `http://localhost:5000/api/jobs/${user.id}/resumes`,
+        `https://resume-screener-mern-1.onrender.com/api/jobs/${user.id}/resumes`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -91,10 +91,10 @@ export const JobProvider = ({ children }) => {
       }
 
       const response = await axios.get(
-        `http://localhost:5000/api/resumes/shortlisted/${user.id}`
+        `https://resume-screener-mern-1.onrender.com/api/resumes/shortlisted/${user.id}`
       );
-      console.log(response.data)
-      setShortlisted(response.data.shortlistedResumes)
+      console.log(response.data);
+      setShortlisted(response.data.shortlistedResumes);
     } catch (err) {
       console.error("Error fetching shortlisted Resumes count:", err);
     }
@@ -113,7 +113,7 @@ export const JobProvider = ({ children }) => {
         resumes,
         allResume,
         shortlistedResumes,
-        shortlisted
+        shortlisted,
       }}
     >
       {children}
