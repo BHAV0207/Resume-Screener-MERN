@@ -60,6 +60,29 @@ const getAllJobsByAdmin = async (req, res) => {
   }
 };
 
+const getAllResumesByAdmin = async (req, res) => {
+  try {
+    const { createdBy } = req.params; // Admin ID
+
+    // Find all jobs created by the given admin
+    const jobs = await Job.find({ createdBy }).select("resumes").lean();
+
+    if (!jobs.length) {
+      return res.status(404).json({ error: "No jobs found for this Admin" });
+    }
+    // Extract all resume IDs from the jobs
+    const allResumeIds = jobs.flatMap(job => job.resumes);
+
+    // Fetch all resumes from the database
+    const resumes = await Resume.find({ _id: { $in: allResumeIds } });
+
+    res.status(200).json({ totalResumes: resumes.length, resumes });
+  } catch (error) {
+    console.error("Error fetching resumes:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 const getAllJobs = async (req, res) => {
   try {
     const jobs = await Job.find();
@@ -211,4 +234,5 @@ module.exports = {
   rankResumesForJob,
   processCandidate,
   getAllJobsByAdmin,
+  getAllResumesByAdmin
 };

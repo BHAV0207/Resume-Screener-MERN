@@ -24,7 +24,7 @@ import { JobContext } from "../store/JobContext";
 
 const Dashboard = () => {
   const { isDarkMode } = useContext(ThemeContext);
-  const { setActiveJobs, setTotalJobs, totalJobs, activeJobs , handleJobCount} = useContext(JobContext)
+  const { setActiveJobs, setTotalJobs, totalJobs, activeJobs , handleJobCount ,  handleResumesCount , setResumes , resumes} = useContext(JobContext)
   const navigate = useNavigate();
 
 
@@ -75,6 +75,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     handleJobCount();
+    handleResumesCount();
   }, []);
 
   return (
@@ -103,13 +104,15 @@ const Dashboard = () => {
           isDark={isDarkMode}
         />
         </div>
+        <div onClick={() => navigate("/admin/all-resumes")} className="cursor-pointer">
         <StatCard
           icon={<Users className="h-6 w-6 text-blue-600" />}
           title="Total Resumes"
-          value="1,890"
+          value={resumes?.totalResumes}
           trend="+18%"
           isDark={isDarkMode}
         />
+        </div>
         <StatCard
           icon={<UserCheck className="h-6 w-6 text-yellow-600" />}
           title="Shortlisted"

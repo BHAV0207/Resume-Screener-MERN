@@ -7,7 +7,8 @@ const {
   deleteJob, 
   rankResumesForJob,
   processCandidate,
-  getAllJobsByAdmin
+  getAllJobsByAdmin,
+  getAllResumesByAdmin
 } = require("../controllers/jobController");
 const { authenticateJWT } = require("../middleware/auth");
 
@@ -16,7 +17,8 @@ const router = express.Router();
 // Job CRUD Operations
 router.post("/create", authenticateJWT, createJob);         
 router.get("/", getAllJobs);  
-router.get("/:createdBy", authenticateJWT , getAllJobsByAdmin)    
+router.get("/:createdBy", authenticateJWT , getAllJobsByAdmin)  
+router.get("/:createdBy/resumes", authenticateJWT , getAllResumesByAdmin)  
 router.get("/job/:jobId", getJobById);         
 router.put("/:jobId",authenticateJWT, updateJob);
 router.delete("/:jobId",authenticateJWT, deleteJob);  
