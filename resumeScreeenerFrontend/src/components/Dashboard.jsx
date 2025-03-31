@@ -24,9 +24,16 @@ import { JobContext } from "../store/JobContext";
 
 const Dashboard = () => {
   const { isDarkMode } = useContext(ThemeContext);
-  const { setActiveJobs, setTotalJobs, totalJobs, activeJobs , handleJobCount ,  handleResumesCount , setResumes , resumes} = useContext(JobContext)
+  const {
+    totalJobs,
+    activeJobs,
+    handleJobCount,
+    handleResumesCount,
+    resumes,
+    shortlistedResumes,
+    shortlisted,
+  } = useContext(JobContext);
   const navigate = useNavigate();
-
 
   // Sample data for charts
   const applicationData = [
@@ -71,11 +78,12 @@ const Dashboard = () => {
     },
     { id: 2, title: "Backend Engineer", status: "Active", date: "2024-03-14" },
     { id: 3, title: "UI/UX Designer", status: "Closed", date: "2024-03-10" },
-  ];  
+  ];
 
   useEffect(() => {
     handleJobCount();
     handleResumesCount();
+    shortlistedResumes();
   }, []);
 
   return (
@@ -86,7 +94,10 @@ const Dashboard = () => {
     >
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div onClick={() => navigate("/admin/posted-jobs")} className="cursor-pointer">
+        <div
+          onClick={() => navigate("/admin/posted-jobs")}
+          className="cursor-pointer"
+        >
           <StatCard
             icon={<Briefcase className="h-6 w-6 text-indigo-600" />}
             title="Total Jobs Posted"
@@ -95,31 +106,42 @@ const Dashboard = () => {
             isDark={isDarkMode}
           />
         </div>
-        <div onClick={() => navigate("/admin/active-jobs")} className="cursor-pointer">
-        <StatCard
-          icon={<BarChartIcon className="h-6 w-6 text-green-600" />}
-          title="Active Jobs"
-          value={activeJobs?.length}
-          trend="+5%"
-          isDark={isDarkMode}
-        />
+        <div
+          onClick={() => navigate("/admin/active-jobs")}
+          className="cursor-pointer"
+        >
+          <StatCard
+            icon={<BarChartIcon className="h-6 w-6 text-green-600" />}
+            title="Active Jobs"
+            value={activeJobs?.length}
+            trend="+5%"
+            isDark={isDarkMode}
+          />
         </div>
-        <div onClick={() => navigate("/admin/all-resumes")} className="cursor-pointer">
-        <StatCard
-          icon={<Users className="h-6 w-6 text-blue-600" />}
-          title="Total Resumes"
-          value={resumes?.totalResumes}
-          trend="+18%"
-          isDark={isDarkMode}
-        />
+        <div
+          onClick={() => navigate("/admin/all-resumes")}
+          className="cursor-pointer"
+        >
+          <StatCard
+            icon={<Users className="h-6 w-6 text-blue-600" />}
+            title="Total Resumes"
+            value={resumes?.totalResumes}
+            trend="+18%"
+            isDark={isDarkMode}
+          />
         </div>
-        <StatCard
-          icon={<UserCheck className="h-6 w-6 text-yellow-600" />}
-          title="Shortlisted"
-          value="280"
-          trend="+8%"
-          isDark={isDarkMode}
-        />
+        <div
+          onClick={() => navigate("/admin/all-resumes")}
+          className="cursor-pointer"
+        >
+          <StatCard
+            icon={<UserCheck className="h-6 w-6 text-yellow-600" />}
+            title="Shortlisted"
+            value={shortlisted?.length}
+            trend="+8%"
+            isDark={isDarkMode}
+          />
+        </div>
       </div>
 
       {/* Charts Section */}
