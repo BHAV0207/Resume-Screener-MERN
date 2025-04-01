@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BarChart as BarChartIcon,
@@ -33,8 +33,10 @@ const Dashboard = () => {
     shortlistedResumes,
     shortlisted,
   } = useContext(JobContext);
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
+  4;
+  const [message, setMessage] = useState(false);
 
   useEffect(() => {
     handleJobCount();
@@ -70,15 +72,32 @@ const Dashboard = () => {
       }
     });
   }
-  const totalResumes = Object.values(experienceCategories).reduce((a, b) => a + b, 0) || 1;
+  const totalResumes =
+    Object.values(experienceCategories).reduce((a, b) => a + b, 0) || 1;
 
-  const chartData = Object.entries(experienceCategories).map(([name, count]) => ({
-    name,
-    value: parseFloat(((count / totalResumes) * 100).toFixed(1)), // Convert to number
-  }));
-  
-  console.log(chartData )
-  
+  const chartData = Object.entries(experienceCategories).map(
+    ([name, count]) => ({
+      name,
+      value: parseFloat(((count / totalResumes) * 100).toFixed(1)), // Convert to number
+    })
+  );
+
+  console.log(chartData);
+  let sum = 0;
+  chartData.forEach((data) => {
+    sum += data.value;
+  });
+  console.log(sum);
+
+  useEffect(() => {
+    // Only set the message when sum is 0 and avoid infinite loop
+    if (sum === 0) {
+      setMessage(true);
+    }
+    if(sum > 0){
+      setMessage(false)
+    }
+  }, [sum]); 
 
   const notifications = [
     {
@@ -98,8 +117,6 @@ const Dashboard = () => {
     },
   ];
 
- 
-
   return (
     <div
       className={`px-5 py-3 transition-colors duration-200 ${
@@ -115,7 +132,7 @@ const Dashboard = () => {
           <StatCard
             icon={<Briefcase className="h-6 w-6 text-indigo-600" />}
             title="Total Jobs Posted"
-            value={totalJobs?.length}
+            value={totalJobs?.length || 0}
             trend="+12%"
             isDark={isDarkMode}
           />
@@ -127,7 +144,7 @@ const Dashboard = () => {
           <StatCard
             icon={<BarChartIcon className="h-6 w-6 text-green-600" />}
             title="Active Jobs"
-            value={activeJobs?.length}
+            value={activeJobs?.length || 0}
             trend="+5%"
             isDark={isDarkMode}
           />
@@ -139,7 +156,7 @@ const Dashboard = () => {
           <StatCard
             icon={<Users className="h-6 w-6 text-blue-600" />}
             title="Total Resumes"
-            value={resumes?.totalResumes}
+            value={resumes?.totalResumes || 0}
             trend="+18%"
             isDark={isDarkMode}
           />
@@ -151,7 +168,7 @@ const Dashboard = () => {
           <StatCard
             icon={<UserCheck className="h-6 w-6 text-yellow-600" />}
             title="Shortlisted"
-            value={shortlisted?.length}
+            value={shortlisted?.length || 0}
             trend="+8%"
             isDark={isDarkMode}
           />
@@ -198,28 +215,32 @@ const Dashboard = () => {
             Candidate Experience Levels
           </h3>
           <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => `${value}%`} />
-              </PieChart>
-            </ResponsiveContainer>
+            {message ? (
+              <div className="text-4xl font-bold p-23 text-red-400"> To get data please post some Jobs </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `${value}%`} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       </div>
@@ -253,7 +274,7 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className={isDarkMode ? "text-gray-300" : "text-gray-700"}>
-                {totalJobs?.map((job) => (
+                {totalJobs ? totalJobs?.map((job) => (
                   <tr key={job._id}>
                     <td className="py-2">{job.title}</td>
                     <td className="py-2">
@@ -271,7 +292,7 @@ const Dashboard = () => {
                       {new Date(job.createdAt).toLocaleDateString()}
                     </td>
                   </tr>
-                ))}
+                )) : <div className="text-4xl font-extrabold text-rose-400  ">No Jobs Posted Yet</div>}
               </tbody>
             </table>
           </div>

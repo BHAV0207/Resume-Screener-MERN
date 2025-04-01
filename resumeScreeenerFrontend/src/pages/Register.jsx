@@ -92,8 +92,8 @@ function Register() {
                 className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white appearance-none"
                 required
               >
-                <option value="admin">Administrator</option>
                 <option value="user">Regular User</option>
+                <option value="admin">Administrator</option>
               </select>
             </div>
           </div>
