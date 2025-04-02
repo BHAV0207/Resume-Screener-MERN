@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { JobContext } from "../store/JobContext";
+import { ThemeContext } from "../store/ThemeContext"; // Import ThemeContext
 
 const PostedJobs = () => {
   const navigate = useNavigate();
@@ -18,38 +19,12 @@ const PostedJobs = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { totalJobs, activeJobs, handleJobCount, deleteJob } =
-    useContext(JobContext);
+  const { totalJobs, handleJobCount, deleteJob } = useContext(JobContext);
+  const { isDarkMode } = useContext(ThemeContext); // Access theme state
 
   useEffect(() => {
     handleJobCount();
   }, []);
-
-  console.log(totalJobs);
-  // Sample data - replace with actual data from your backend
-  const jobs = [
-    {
-      id: 1,
-      title: "Senior Frontend Developer",
-      department: "Engineering",
-      location: "Remote",
-      type: "Full-time",
-      postedDate: "2024-03-15",
-      status: "active",
-      applicants: 45,
-    },
-    {
-      id: 2,
-      title: "UX Designer",
-      department: "Design",
-      location: "New York",
-      type: "Full-time",
-      postedDate: "2024-03-14",
-      status: "closed",
-      applicants: 32,
-    },
-    // Add more sample jobs...
-  ];
 
   const filteredJobs = (totalJobs || []).filter((job) => {
     const matchesSearch = job.title
@@ -68,12 +43,14 @@ const PostedJobs = () => {
   );
 
   return (
-    <div className="bg-white dark:bg-gray-900 shadow-lg p-6 h-[100vh]">
+    <div
+      className={`p-6 h-[100vh] ${
+        isDarkMode ? "bg-gray-900 text-white" : "bg-white text-gray-900"
+      }`}
+    >
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-0">
-          Posted Jobs
-        </h1>
+        <h1 className="text-2xl font-bold mb-4 sm:mb-0">Posted Jobs</h1>
         <button
           className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors"
           onClick={() => navigate("/admin/post-jobs")}
@@ -92,15 +69,23 @@ const PostedJobs = () => {
           <input
             type="text"
             placeholder="Search jobs..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white"
+            className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 ${
+              isDarkMode
+                ? "border-gray-700 bg-gray-800 text-white"
+                : "border-gray-300 bg-gray-50"
+            }`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <div className="flex items-center gap-2">
-          <Filter size={20} className="text-gray-500 dark:text-gray-400" />
+          <Filter size={20} className="text-gray-500" />
           <select
-            className="border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-white"
+            className={`border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 ${
+              isDarkMode
+                ? "border-gray-700 bg-gray-800 text-white"
+                : "border-gray-300 bg-gray-50"
+            }`}
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
@@ -116,76 +101,50 @@ const PostedJobs = () => {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-200 dark:border-gray-700">
-              <th className="text-left py-3 px-4 text-gray-600 dark:text-gray-400">
-                Job Title
-              </th>
-              <th className="text-left py-3 px-4 text-gray-600 dark:text-gray-400">
-                Location
-              </th>
-              <th className="text-left py-3 px-4 text-gray-600 dark:text-gray-400">
-                Description
-              </th>
-              <th className="text-left py-3 px-4 text-gray-600 dark:text-gray-400">
-                Posted Date
-              </th>
-              <th className="text-left py-3 px-4 text-gray-600 dark:text-gray-400">
-                Status
-              </th>
-              <th className="text-left py-3 px-4 text-gray-600 dark:text-gray-400">
-                Applicants
-              </th>
-              <th className="text-left py-3 px-4 text-gray-600 dark:text-gray-400">
-                Actions
-              </th>
+            <tr
+              className={`border-b ${
+                isDarkMode ? "border-gray-700" : "border-gray-200"
+              }`}
+            >
+              <th className="text-left py-3 px-4">Job Title</th>
+              <th className="text-left py-3 px-4">Location</th>
+              <th className="text-left py-3 px-4">Description</th>
+              <th className="text-left py-3 px-4">Posted Date</th>
+              <th className="text-left py-3 px-4">Status</th>
+              <th className="text-left py-3 px-4">Applicants</th>
+              <th className="text-left py-3 px-4">Actions</th>
             </tr>
           </thead>
           <tbody>
             {paginatedJobs.map((job) => (
               <tr
                 key={job.id}
-                className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800"
+                className={`border-b ${
+                  isDarkMode ? "border-gray-800" : "border-gray-100"
+                } hover:${isDarkMode ? "bg-gray-800" : "bg-gray-50"}`}
               >
-                <td className="py-3 px-4">
-                  <div className="font-medium text-gray-900 dark:text-white">
-                    {job.title}
-                  </div>
-                </td>
-                <td className="py-3 px-4 text-gray-600 dark:text-gray-300">
-                  {job.location}
-                </td>
-                <td className="py-3 px-4 text-gray-600 dark:text-gray-300 overflow-hidden max-h-16 line-clamp-3">
+                <td className="py-3 px-4">{job.title}</td>
+                <td className="py-3 px-4">{job.location}</td>
+                <td className="py-3 px-4 overflow-hidden max-h-16 line-clamp-3">
                   {job.description}
                 </td>
-
-                <td className="py-3 px-4 text-gray-600 dark:text-gray-300">
+                <td className="py-3 px-4">
                   {new Date(job.createdAt).toLocaleDateString()}
                 </td>
                 <td className="py-3 px-4">
                   <span
                     className={`px-2 py-1 rounded-full text-xs ${
-                      job.active === true
-                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                        : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                      job.active
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-800"
                     }`}
                   >
                     {job.active ? "Active" : "Closed"}
                   </span>
                 </td>
-                <td className="py-3 px-4 text-gray-600 dark:text-gray-300">
-                  {job.resumes.length}
-                </td>
+                <td className="py-3 px-4">{job.resumes.length}</td>
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-2">
-                    {/* <button
-                      className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
-                      title="Edit"
-                    >
-                      <Edit2
-                        size={18}
-                        className="text-gray-600 dark:text-gray-400"
-                      />
-                    </button> */}
                     <button
                       className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
                       title="Delete"
@@ -206,7 +165,7 @@ const PostedJobs = () => {
 
       {/* Pagination */}
       <div className="flex items-center justify-between mt-6">
-        <div className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="text-sm">
           Showing {startIndex + 1} to{" "}
           {Math.min(startIndex + itemsPerPage, filteredJobs.length)} of{" "}
           {filteredJobs.length} entries
@@ -215,14 +174,11 @@ const PostedJobs = () => {
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            className="p-2 rounded-lg border border-gray-300 dark:border-gray-700 disabled:opacity-50"
+            className="p-2 rounded-lg border border-gray-300 disabled:opacity-50"
           >
-            <ChevronLeft
-              size={20}
-              className="text-gray-600 dark:text-gray-400"
-            />
+            <ChevronLeft size={20} className="text-gray-600" />
           </button>
-          <span className="text-gray-600 dark:text-gray-400">
+          <span className="text-gray-600">
             Page {currentPage} of {totalPages}
           </span>
           <button
@@ -230,12 +186,9 @@ const PostedJobs = () => {
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
             disabled={currentPage === totalPages}
-            className="p-2 rounded-lg border border-gray-300 dark:border-gray-700 disabled:opacity-50"
+            className="p-2 rounded-lg border border-gray-300 disabled:opacity-50"
           >
-            <ChevronRight
-              size={20}
-              className="text-gray-600 dark:text-gray-400"
-            />
+            <ChevronRight size={20} className="text-gray-600" />
           </button>
         </div>
       </div>

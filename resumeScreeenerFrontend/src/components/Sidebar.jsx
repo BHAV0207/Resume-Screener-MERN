@@ -82,7 +82,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
             isOpen={isOpen}
             isDarkMode={isDarkMode}
           />
-          
+
           <NavItem
             icon={<Briefcase size={20} />}
             text="Active Jobs"
@@ -150,9 +150,15 @@ const NavItem = ({ icon, text, route, isOpen, isDarkMode }) => {
   const location = useLocation();
   const isActive = location.pathname === route;
 
+  const handleLogout = () => {
+    // Clear localStorage on logout
+    localStorage.clear(); // Clears all data stored in localStorage
+    navigate(route); // Redirect to the provided route (for example, the home page or login page)
+  };
+
   return (
     <button
-      onClick={() => navigate(route)}
+      onClick={text === "Logout" ? handleLogout : () => navigate(route)} // Special handling for Logout
       className={`
         w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors
         ${
