@@ -35,7 +35,7 @@ const Dashboard = () => {
   } = useContext(JobContext);
 
   const navigate = useNavigate();
-  4;
+
   const [message, setMessage] = useState(false);
 
   useEffect(() => {
@@ -214,7 +214,7 @@ const Dashboard = () => {
           </h3>
           <div className="h-80">
             {message ? (
-              <div className="text-4xl font-bold p-23 text-red-400"> To get data please post some Jobs </div>
+              <div className="text-4xl font-bold p-23 text-red-400"> No Resumes till now to get data </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>

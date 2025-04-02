@@ -7,7 +7,7 @@ const sendEmail = require("../utils/emailService");
 // 1️⃣ Create a new job posting
 const createJob = async (req, res) => {
   try {
-    const { title, description, requiredSkills, minExperience } = req.body;
+    const { title, description, requiredSkills, minExperience , company , location , salary } = req.body;
 
     const adminId = req.user.userId; // Assuming `req.user` contains the authenticated admin's ID
 
@@ -25,6 +25,9 @@ const createJob = async (req, res) => {
       requiredSkills: lowercaseSkills,
       minExperience: minExperience || 0,
       createdBy: adminId, // Store the admin who created the job
+      company,
+      location,
+      salary
     });
 
     await job.save();
