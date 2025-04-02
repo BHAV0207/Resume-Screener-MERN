@@ -1,6 +1,7 @@
 const Job = require("../models/job");
 const Resume = require("../models/resume");
 const stringSimilarity = require("string-similarity");
+const User = require("../models/user")
 const sendEmail = require("../utils/emailService");
 
 // 1️⃣ Create a new job posting
@@ -132,6 +133,14 @@ const deleteJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.jobId);
     if (!job) return res.status(404).json({ error: "Job not found" });
+
+    const users = await User.find({ appliedJobs: job._id });
+
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i];
+      user.appliedJobs = user.appliedJobs.filter((jobId) => !jobId.equals(job._id));
+      await user.save();
+    }
 
     await job.deleteOne();
     res.status(200).json({ message: "Job deleted successfully" });

@@ -44,13 +44,12 @@ const Dashboard = () => {
     shortlistedResumes();
   }, []);
 
-  // Sample data for charts
-  const applicationData = [
-    { name: "Frontend Dev", applications: 55 },
-    { name: "Backend Dev", applications: 32 },
-    { name: "UI Designer", applications: 28 },
-    { name: "DevOps", applications: 15 },
-  ];
+  const applicationData = totalJobs?.map((data) => {
+    return { 
+      "name": data.title, 
+      "applications": data.resumes?.length || 0
+    };
+  });
 
   const COLORS = ["#4F46E5", "#10B981", "#F59E0B"];
 
@@ -82,12 +81,10 @@ const Dashboard = () => {
     })
   );
 
-  console.log(chartData);
   let sum = 0;
   chartData.forEach((data) => {
     sum += data.value;
   });
-  console.log(sum);
 
   useEffect(() => {
     // Only set the message when sum is 0 and avoid infinite loop
@@ -98,6 +95,7 @@ const Dashboard = () => {
       setMessage(false)
     }
   }, [sum]); 
+
 
   const notifications = [
     {

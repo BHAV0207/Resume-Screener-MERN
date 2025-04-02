@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Trophy } from "lucide-react";
 import { createContext, useState } from "react";
 
 export const JobContext = createContext();
@@ -46,6 +47,7 @@ export const JobProvider = ({ children }) => {
       const jobCount = response.data;
 
       console.log(jobCount);
+      console.log(activeJobsCount)
 
       setTotalJobs(jobCount);
       setActiveJobs(activeJobsCount);
@@ -100,6 +102,64 @@ export const JobProvider = ({ children }) => {
     }
   };
 
+  // const getJobById = async (jobId) => {
+  //   try{
+  //     const response = await axios.get(`https://resume-screener-mern-1.onrender.com/api/jobs/${jobId}`)
+  //   }catch(err){
+
+  //   }
+  // }
+
+  const deleteJob = async  (jobId) => {
+    try{
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Token not found in localStorage");
+        return;
+      }
+
+      const res = await axios.delete(`https://resume-screener-mern-1.onrender.com/api/jobs/${jobId}` ,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+
+      )
+
+      handleJobCount();
+      console.log(res.data)
+    }catch(err){
+      console.error("Error deleting Job", err);
+    }
+  }
+
+
+  const updateJob = async  (jobId) => {
+    try{
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Token not found in localStorage");
+        return;
+      }
+
+      const res = await axios.put(`https://resume-screener-mern-1.onrender.com/api/jobs/${jobId}` ,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+
+      )
+
+      handleJobCount();
+      console.log(res.data)
+    }catch(err){
+      console.error("Error deleting Job", err);
+    }
+  }
   return (
     <JobContext.Provider
       value={{
@@ -114,6 +174,7 @@ export const JobProvider = ({ children }) => {
         allResume,
         shortlistedResumes,
         shortlisted,
+        deleteJob
       }}
     >
       {children}
