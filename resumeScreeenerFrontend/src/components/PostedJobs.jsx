@@ -19,13 +19,26 @@ const PostedJobs = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { totalJobs, handleJobCount, deleteJob } = useContext(JobContext);
+  const { totalJobs, handleJobCount, deleteJob , getJobById , job} = useContext(JobContext);
   const { isDarkMode } = useContext(ThemeContext); // Access theme state
 
   useEffect(() => {
     handleJobCount();
   }, []);
 
+
+  const handleApplicants = async (jobId) => {
+    await getJobById(jobId); 
+  }
+
+  useEffect(() => {
+    // Navigate only after the job data has been updated
+    if (job) {
+      navigate(`/admin/posted-jobs/${job._id}`);
+    }
+  }, [job]);
+
+  
   const filteredJobs = (totalJobs || []).filter((job) => {
     const matchesSearch = job.title
       .toLowerCase()
@@ -118,7 +131,7 @@ const PostedJobs = () => {
           <tbody>
             {paginatedJobs.map((job) => (
               <tr
-                key={job.id}
+                key={job._id}
                 className={`border-b ${
                   isDarkMode ? "border-gray-800" : "border-gray-100"
                 } hover:${isDarkMode ? "bg-gray-800" : "bg-gray-50"}`}
@@ -142,7 +155,8 @@ const PostedJobs = () => {
                     {job.active ? "Active" : "Closed"}
                   </span>
                 </td>
-                <td className="py-3 px-4">{job.resumes.length}</td>
+                <td onClick={() => handleApplicants(job._id)}
+                 className="py-3 px-4 cursor-pointer hover:bg-gray-200 rounded-3xl">{job.resumes.length}</td>
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-2">
                     <button

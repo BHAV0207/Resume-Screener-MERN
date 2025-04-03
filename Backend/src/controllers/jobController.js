@@ -99,7 +99,12 @@ const getAllJobs = async (req, res) => {
 
 const getJobById = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.jobId);
+    const job = await Job.findById(req.params.jobId)
+      .populate({
+        path: "resumes",
+        model: "Resume", // Ensure it refers to the correct model
+      });
+
     if (!job) return res.status(404).json({ error: "Job not found" });
 
     res.status(200).json(job);
@@ -108,6 +113,8 @@ const getJobById = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
 
 const updateJob = async (req, res) => {
   try {
@@ -203,8 +210,19 @@ const rankResumesForJob = async (req, res) => {
       let experienceScore = 0;
       let finalScore = 0;
 
+      // Ensure resume.skills is an array
+      if (!Array.isArray(resume.skills) || resume.skills.length === 0) {
+        console.warn(`Skipping resume with empty or invalid skills:`, resume._id);
+        return { resume, skillMatches, experienceScore, finalScore };
+      }
+
       // Compare each required skill to resume skills
       job.requiredSkills.forEach((jobSkill) => {
+        if (typeof jobSkill !== "string") {
+          console.warn(`Skipping invalid jobSkill:`, jobSkill);
+          return;
+        }
+
         const match = stringSimilarity.findBestMatch(jobSkill, resume.skills);
         if (match.bestMatch.rating > 0.7) {
           skillMatches++;
@@ -217,6 +235,7 @@ const rankResumesForJob = async (req, res) => {
           experienceScore = Math.min(resume.experience / job.minExperience, 1) * 10;
         }
       }
+
       // Final Score Calculation (Avoid division by zero)
       let skillScore =
         job.requiredSkills.length > 0
@@ -227,6 +246,9 @@ const rankResumesForJob = async (req, res) => {
       return { resume, skillMatches, experienceScore, finalScore };
     });
 
+    // Remove any undefined results
+    rankedResumes = rankedResumes.filter((r) => r !== undefined);
+
     // Sort resumes by highest score
     rankedResumes.sort((a, b) => b.finalScore - a.finalScore);
 
@@ -236,6 +258,7 @@ const rankResumesForJob = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 module.exports = {
   createJob,

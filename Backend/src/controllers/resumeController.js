@@ -3,6 +3,7 @@ const Resume = require("../models/resume");
 const Job = require("../models/job");
 const User = require("../models/user");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { get } = require("mongoose");
 
 require("dotenv").config();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -155,6 +156,28 @@ const updateResume = async (req, res) => {
   }
 };
 
+
+const getResumesById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find the job by ID
+    const resume = await Resume.findById(id);
+    if (!resume) {
+      return res.status(404).json({ error: "Resume not found" });
+    }
+    // Find the job associated with this resume
+    const job = await Job.findOne({ resumes: id });
+    if (!job) {
+      return res.status(404).json({ error: "Job not found for this resume" });
+    }
+    // Send the resume and job details
+    res.status(200).json({ resume, job });
+  } catch (err) {
+    console.error("Error fetching resumes:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
  
 const shortlistedResumes = async (req, res) => {
   try {
@@ -182,4 +205,4 @@ const shortlistedResumes = async (req, res) => {
 
 
 
-module.exports = { uploadResume , shortlistedResumes , updateResume};
+module.exports = { uploadResume , shortlistedResumes , updateResume , getResumesById };

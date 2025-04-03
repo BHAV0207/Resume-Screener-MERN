@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Trophy } from "lucide-react";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 
 export const JobContext = createContext();
 
@@ -10,6 +10,7 @@ export const JobProvider = ({ children }) => {
   const [resumes, setResumes] = useState(null);
   const [allResume, setAllResume] = useState([]);
   const [shortlisted, setShortlisted] = useState([]);
+  const [job , setJob] = useState("");
 
   const handleJobCount = async () => {
     try {
@@ -158,6 +159,17 @@ export const JobProvider = ({ children }) => {
     }
   };
 
+  const getJobById = async (jobId) => {
+    try {
+      const res = await axios.get(
+        `https://resume-screener-mern-1.onrender.com/api/jobs/job/${jobId}`
+      );
+      setJob(res.data); // Set the job data in the state
+    } catch (err) {
+      console.error("Error fetching job by ID:", err);
+    }
+  };
+  
   return (
     <JobContext.Provider
       value={{
@@ -174,6 +186,8 @@ export const JobProvider = ({ children }) => {
         shortlisted,
         deleteJob,
         updateJob,
+        getJobById,
+        job
       }}
     >
       {children}
