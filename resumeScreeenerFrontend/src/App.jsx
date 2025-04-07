@@ -12,6 +12,7 @@ import AllResumes from "./components/AllResumes";
 import UserPage from "./pages/UserPage";
 import ActiveJobs from "./components/ActiveJobs";
 import JobCandidates from "./components/JobCandidates";
+import Profile from "./components/Profile";
 
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
           <Route path="active-jobs" element={<ActiveJobs />} />
           <Route path="posted-jobs/:jobId"  element={<JobCandidates />} />
           <Route path="active-jobs/:jobId"  element={<JobCandidates />} />
+          <Route path="profile" element={<Profile />} />
 
         </Route>
 

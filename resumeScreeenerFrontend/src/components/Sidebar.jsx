@@ -102,16 +102,9 @@ const Sidebar = ({ isOpen, toggleSidebar, isMobile }) => {
 
         <NavSection title="SETTINGS" isOpen={isOpen} isDarkMode={isDarkMode}>
           <NavItem
-            icon={<Settings size={20} />}
-            text="Settings"
-            route="/settings"
-            isOpen={isOpen}
-            isDarkMode={isDarkMode}
-          />
-          <NavItem
-            icon={<HelpCircle size={20} />}
-            text="Help"
-            route="/help"
+            icon={<Users size={20} />}
+            text="Profile"
+            route="/admin/profile"
             isOpen={isOpen}
             isDarkMode={isDarkMode}
           />

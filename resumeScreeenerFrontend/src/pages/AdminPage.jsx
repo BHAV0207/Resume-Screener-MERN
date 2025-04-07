@@ -6,6 +6,18 @@ import Header from "../components/Header";
 function AdminLayout() {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [user , setUsser ] = useState("")
+
+  useEffect(() => {
+    const fetchedUser = () => {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        setUsser(JSON.parse(storedUser));
+        console.log(storedUser);
+      }
+    };
+    fetchedUser();
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -17,6 +29,7 @@ function AdminLayout() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
 
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
@@ -41,8 +54,8 @@ function AdminLayout() {
           toggleSidebar={toggleSidebar} 
           isSidebarOpen={isSidebarOpen}
           userInfo={{
-            name: "John Doe",
-            role: "Admin",
+            name: user.name,
+            role: user.type,
             avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
           }}
         />

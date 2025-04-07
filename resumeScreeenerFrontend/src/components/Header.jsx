@@ -1,10 +1,12 @@
 import React, { useContext } from "react";
 import { Menu, Bell, Search, Sun, Moon } from "lucide-react";
 import { ThemeContext } from "../store/ThemeContext";
+import { useNavigate } from "react-router-dom";
 
 
 const Header = ({ toggleSidebar, isSidebarOpen, userInfo }) => {
   const { setIsDarkMode, isDarkMode } = useContext(ThemeContext);
+  const navigate = useNavigate();
 
 
   const toggleTheme = () => {
@@ -38,24 +40,19 @@ const Header = ({ toggleSidebar, isSidebarOpen, userInfo }) => {
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
-            {/* Notifications */}
-            <button className="p-2 text-gray-400 hover:text-gray-500 relative">
-              <Bell size={20} />
-              <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" />
-            </button>
 
             {/* User Menu */}
-            <div className="flex items-center">
+            <div className="flex items-center hover:cursor-cell" onClick={() => navigate("/admin/profile")}>
               <img
                 className="h-8 w-8 rounded-full"
                 src={userInfo.avatar}
                 alt={userInfo.name}
               />
               <div className="hidden md:flex ml-2 flex-col">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-sm font-medium text-black dark:text-emerald-600">
                   {userInfo.name}
                 </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-gray-500 dark:text-red-600">
                   {userInfo.role}
                 </span>
               </div>
