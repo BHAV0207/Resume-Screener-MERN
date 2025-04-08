@@ -9,10 +9,13 @@ import Dashboard from "./components/Dashboard";
 import PostJobs from "./components/PostJobs";
 import PostedJobs from "./components/PostedJobs";
 import AllResumes from "./components/AllResumes";
-import UserPage from "./pages/UserPage";
+import UserLayout from "./pages/UserPage";
 import ActiveJobs from "./components/ActiveJobs";
 import JobCandidates from "./components/JobCandidates";
 import Profile from "./components/Profile";
+import UserDashboard from "./UserComponents/UserDashboard";
+import BrowseJobs from "./UserComponents/BrowseJobs";
+import Applications from "./UserComponents/Applications";
 
 
 function App() {
@@ -46,9 +49,17 @@ function App() {
         <Route
           path="/user"
           element={
-            <ProtectedRoute role="user" element={<UserPage />} />
+            <ProtectedRoute role="user" element={<UserLayout />} />
           }
-        />
+        >
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<UserDashboard />} />
+          <Route path="browse-jobs" element={<BrowseJobs />} />
+          <Route path="applications" element={<Applications/>} />
+          <Route path="profile" element={<Profile />} />
+
+        </Route>
+        
       </Routes>
     </Router>
   );

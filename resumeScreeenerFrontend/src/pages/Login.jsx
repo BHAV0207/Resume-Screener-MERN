@@ -52,12 +52,6 @@ function Login() {
               <label className="text-sm font-medium text-gray-700">
                 Password
               </label>
-              {/* <a
-                href="#"
-                className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
-              >
-                Forgot password?
-              </a> */}
             </div>
             <div className="relative">
               <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />

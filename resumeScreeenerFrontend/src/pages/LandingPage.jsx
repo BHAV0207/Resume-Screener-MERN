@@ -33,9 +33,6 @@ function LandingPage() {
                 Browse Jobs
                 <ArrowRight className="ml-2 h-5 w-5" />
               </button>
-              <button className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                For Employers
-              </button>
             </div>
           </div>
         </div>
@@ -56,7 +53,7 @@ function LandingPage() {
               {features.map((feature, index) => (
                 <div
                   key={index}
-                  className="relative bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition duration-300 cursor-pointer"
+                  className="relative bg-white p-6 rounded-xl shadow-sm hover:shadow-xl transition duration-300 cursor-pointer"
                   onClick={() => setSelectedFeature(index)}
                 >
                   <div className="absolute -top-10 left-1/2 -translate-x-1/2">
