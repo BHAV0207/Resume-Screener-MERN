@@ -1,19 +1,21 @@
 import React, { useContext, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../store/AuthCOntext";
-import { Lock, Mail, Loader2 } from "lucide-react";
+import { Lock, Mail, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 
 function Login() {
   const { AxiosLogin, email, setEmail, password, setPassword, success, err } =
     useContext(AuthContext);
 
-  const [loading , setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleForm = async (e) => {
     e.preventDefault();
+    setLoading(true);
     await AxiosLogin(navigate);
+    setLoading(false);
   };
 
   return (
@@ -68,22 +70,28 @@ function Login() {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center space-x-2 font-medium"
+            disabled={loading}
+            className={`w-full bg-blue-600 text-white py-3 px-4 rounded-lg transition-all duration-200 shadow-lg flex items-center justify-center space-x-2 font-medium
+    ${
+      loading
+        ? "opacity-60 cursor-not-allowed"
+        : "hover:bg-blue-700 hover:shadow-xl transform hover:-translate-y-0.5"
+    }`}
           >
             {loading && <Loader2 className="w-5 h-5 animate-spin" />}
-            <span>Login</span>
+            <span>{loading ? "Logging in..." : "Login"}</span>
           </button>
         </form>
 
         {/* Messages */}
         {success && (
-          <div className="mt-4 p-4 rounded-lg bg-green-50 border border-green-200 text-green-700 flex items-center">
+          <div className="mt-4 p-4 rounded-lg bg-green-50 border border-green-200 text-green-700 flex items-center animate-fade-in">
             <CheckCircle className="w-5 h-5 mr-2" />
             {success}
           </div>
         )}
         {err && (
-          <div className="mt-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-center">
+          <div className="mt-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-center animate-fade-in">
             <AlertCircle className="w-5 h-5 mr-2" />
             {err}
           </div>
@@ -93,7 +101,7 @@ function Login() {
         <div className="mt-8 text-center">
           <span className="text-gray-500">Don't have an account?</span>
           <button
-            onClick={() => navigate('/register')}
+            onClick={() => navigate("/register")}
             className="ml-2 text-blue-600 font-medium hover:text-blue-800 transition-colors"
           >
             Create an account

@@ -1,7 +1,15 @@
-import React, { useContext } from "react";
-import { AuthContext } from "../store/AuthCOntext"
+import React, { useContext, useState } from "react";
+import { AuthContext } from "../store/AuthCOntext";
 import { useNavigate } from "react-router-dom";
-import { User, Mail, Lock, ChevronDown, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  User,
+  Mail,
+  Lock,
+  ChevronDown,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
 
 function Register() {
   const navigate = useNavigate();
@@ -19,9 +27,13 @@ function Register() {
     err,
   } = useContext(AuthContext);
 
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    setLoading(true);
     AxiosRegister();
+    setLoading(false);
   };
 
   return (
@@ -38,7 +50,9 @@ function Register() {
         {/* Register Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 block">Full Name</label>
+            <label className="text-sm font-medium text-gray-700 block">
+              Full Name
+            </label>
             <div className="relative">
               <User className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
               <input
@@ -53,7 +67,9 @@ function Register() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 block">Email Address</label>
+            <label className="text-sm font-medium text-gray-700 block">
+              Email Address
+            </label>
             <div className="relative">
               <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
               <input
@@ -68,7 +84,9 @@ function Register() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 block">Password</label>
+            <label className="text-sm font-medium text-gray-700 block">
+              Password
+            </label>
             <div className="relative">
               <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
               <input
@@ -83,7 +101,9 @@ function Register() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 block">Account Type</label>
+            <label className="text-sm font-medium text-gray-700 block">
+              Account Type
+            </label>
             <div className="relative">
               <ChevronDown className="w-5 h-5 text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
               <select
@@ -100,13 +120,19 @@ function Register() {
 
           <button
             type="submit"
-            className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center space-x-2 font-medium"
+            disabled={loading}
+            className={`w-full bg-purple-600 text-white py-3 px-4 rounded-lg transition-all duration-200 shadow-lg flex items-center justify-center space-x-2 font-medium
+              ${
+                loading
+                  ? "opacity-60 cursor-not-allowed"
+                  : "hover:bg-purple-700 hover:shadow-xl transform hover:-translate-y-0.5"
+              }`}
           >
             {/* {loading && <Loader2 className="w-5 h-5 animate-spin" />} */}
-            <span>Create Account</span>
+            {loading && <Loader2 className="w-5 h-5 animate-spin" />}
+            <span>{loading ? "Creating in..." : "Create Acoount"}</span>
           </button>
         </form>
-
 
         {/* Messages */}
         {success && (
@@ -135,10 +161,14 @@ function Register() {
 
         <div className="mt-8 pt-6 border-t border-gray-100">
           <p className="text-xs text-center text-gray-500">
-            By creating an account, you agree to our{' '}
-            <a href="#" className="text-purple-600 hover:text-purple-800">Terms of Service</a>
-            {' '}and{' '}
-            <a href="#" className="text-purple-600 hover:text-purple-800">Privacy Policy</a>
+            By creating an account, you agree to our{" "}
+            <a href="#" className="text-purple-600 hover:text-purple-800">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href="#" className="text-purple-600 hover:text-purple-800">
+              Privacy Policy
+            </a>
           </p>
         </div>
       </div>
