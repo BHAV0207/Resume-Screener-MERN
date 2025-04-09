@@ -11,8 +11,10 @@ import {
 import { JobContext } from "../store/JobContext";
 
 function BrowseJobs() {
-
-  const { getAllJobs, allJobs } = useContext(JobContext);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null); // State to hold the selected resume file
+  const { getAllJobs, allJobs, applyForJob, setApplied, applied } =
+    useContext(JobContext);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -26,47 +28,18 @@ function BrowseJobs() {
   }, []);
 
   console.log(allJobs);
-  
-  const [searchTerm, setSearchTerm] = useState("");
 
-  const jobs = [
-    {
-      id: 1,
-      title: "Senior Frontend Developer",
-      company: "TechCorp",
-      location: "San Francisco, CA",
-      salary: "$120k - $150k",
-      type: "Full-time",
-      posted: "2 days ago",
-      logo: "https://images.unsplash.com/photo-1516387938699-a93567ec168e?w=100&h=100&fit=crop",
-      description:
-        "We are looking for an experienced Frontend Developer to join our team...",
-    },
-    {
-      id: 2,
-      title: "UX Designer",
-      company: "DesignHub",
-      location: "Remote",
-      salary: "$90k - $120k",
-      type: "Full-time",
-      posted: "1 day ago",
-      logo: "https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=100&h=100&fit=crop",
-      description:
-        "Join our design team to create beautiful and intuitive user experiences...",
-    },
-    {
-      id: 3,
-      title: "Backend Engineer",
-      company: "StartupX",
-      location: "New York, NY",
-      salary: "$130k - $160k",
-      type: "Full-time",
-      posted: "3 days ago",
-      logo: "https://images.unsplash.com/photo-1549421263-5ec394a5ad4c?w=100&h=100&fit=crop",
-      description:
-        "Looking for a skilled Backend Engineer to help scale our infrastructure...",
-    },
-  ];
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
+
+  const handleApplying = (jobId) => {
+    if (selectedFile) {
+      applyForJob(selectedFile, jobId); // Pass the file and job ID to the applyForJob function
+    } else {
+      alert("Please select a resume file before applying.");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -99,11 +72,6 @@ function BrowseJobs() {
           >
             <div className="flex items-start justify-between">
               <div className="flex gap-4">
-                {/* <img
-                  src={job.logo}
-                  alt={job.company}
-                  className="h-12 w-12 rounded-lg"
-                /> */}
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                     {job.title}
@@ -128,13 +96,29 @@ function BrowseJobs() {
                       </div>
                       <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
                         <Clock className="h-4 w-4" />
-                        <span>{new Date(job.createdAt).toLocaleDateString()}</span>
+                        <span>
+                          {new Date(job.createdAt).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <button className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+
+              {/* File Upload */}
+              <div className="mt-4">
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  className="border border-gray-300 rounded-md p-2"
+                />
+              </div>
+
+              {/* Apply Button */}
+              <button
+                onClick={() => handleApplying(job._id)} // Pass job._id to handleApplying
+                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              >
                 Apply Now
               </button>
             </div>

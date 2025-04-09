@@ -1,6 +1,5 @@
 import axios from "axios";
-import { Trophy } from "lucide-react";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState } from "react";
 
 export const JobContext = createContext();
 
@@ -12,6 +11,7 @@ export const JobProvider = ({ children }) => {
   const [shortlisted, setShortlisted] = useState([]);
   const [job , setJob] = useState("");
   const [allJobs , setAllJobs] = useState([]);
+  const [applied, setApplied] = useState(false);
 
   const handleJobCount = async () => {
     try {
@@ -182,6 +182,52 @@ export const JobProvider = ({ children }) => {
       console.error("Error fetching all jobs:", err);
     }
   } 
+
+
+const applyForJob = async (file, jobId) => {
+  try {
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!token) {
+      console.error("Token not found in localStorage");
+      return;
+    }
+
+    if (!user?.id) {
+      console.error("User ID not found in localStorage");
+      return;
+    }
+
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('resume', file);  // Resume file
+    formData.append('name', user.name || "Unknown");  // Name
+    formData.append('email', user.email || "No Email");  // Email
+    formData.append('jobId', jobId);  // Job ID
+
+    // Send request to backend
+    const response = await axios.post("https://resume-screener-mern-1.onrender.com/api/resumes/upload", formData, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data' // Set Content-Type for file upload
+      }
+    });
+
+    if (response.status === 201) {
+      console.log('Resume uploaded successfully:', response.data);
+      alert('Job application submitted successfully!');
+      setApplied(true);
+    } else {
+      console.error('Error submitting resume:', response.data.error);
+      alert(`Error: ${response.data.error}`);
+    }
+  } catch (err) {
+    console.error("Error applying for job:", err.message);
+    alert('There was an error submitting your application.');
+  }
+};
+
   
   return (
     <JobContext.Provider
@@ -203,6 +249,9 @@ export const JobProvider = ({ children }) => {
         job,
         getAllJobs,
         allJobs,
+        applyForJob,
+        setApplied,
+        applied,
       }}
     >
       {children}
