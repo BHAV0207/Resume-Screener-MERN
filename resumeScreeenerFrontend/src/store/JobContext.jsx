@@ -11,6 +11,7 @@ export const JobProvider = ({ children }) => {
   const [allResume, setAllResume] = useState([]);
   const [shortlisted, setShortlisted] = useState([]);
   const [job , setJob] = useState("");
+  const [allJobs , setAllJobs] = useState([]);
 
   const handleJobCount = async () => {
     try {
@@ -169,6 +170,18 @@ export const JobProvider = ({ children }) => {
       console.error("Error fetching job by ID:", err);
     }
   };
+
+  const getAllJobs = async () => {
+    try{
+      const res = await axios.get(
+        `https://resume-screener-mern-1.onrender.com/api/jobs`
+      );
+      setAllJobs(res.data);
+    }
+    catch(err){
+      console.error("Error fetching all jobs:", err);
+    }
+  } 
   
   return (
     <JobContext.Provider
@@ -187,7 +200,9 @@ export const JobProvider = ({ children }) => {
         deleteJob,
         updateJob,
         getJobById,
-        job
+        job,
+        getAllJobs,
+        allJobs,
       }}
     >
       {children}

@@ -1,42 +1,70 @@
-import React, { useState } from 'react';
-import { Search, MapPin, Building, DollarSign, Clock, Briefcase, Filter } from 'lucide-react';
+import React, { useContext, useEffect, useState } from "react";
+import {
+  Search,
+  MapPin,
+  Building,
+  DollarSign,
+  Clock,
+  Briefcase,
+  Filter,
+} from "lucide-react";
+import { JobContext } from "../store/JobContext";
 
 function BrowseJobs() {
-  const [searchTerm, setSearchTerm] = useState('');
+
+  const { getAllJobs, allJobs } = useContext(JobContext);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        await getAllJobs();
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+      }
+    };
+    fetchJobs();
+  }, []);
+
+  console.log(allJobs);
   
+  const [searchTerm, setSearchTerm] = useState("");
+
   const jobs = [
     {
       id: 1,
-      title: 'Senior Frontend Developer',
-      company: 'TechCorp',
-      location: 'San Francisco, CA',
-      salary: '$120k - $150k',
-      type: 'Full-time',
-      posted: '2 days ago',
-      logo: 'https://images.unsplash.com/photo-1516387938699-a93567ec168e?w=100&h=100&fit=crop',
-      description: 'We are looking for an experienced Frontend Developer to join our team...',
+      title: "Senior Frontend Developer",
+      company: "TechCorp",
+      location: "San Francisco, CA",
+      salary: "$120k - $150k",
+      type: "Full-time",
+      posted: "2 days ago",
+      logo: "https://images.unsplash.com/photo-1516387938699-a93567ec168e?w=100&h=100&fit=crop",
+      description:
+        "We are looking for an experienced Frontend Developer to join our team...",
     },
     {
       id: 2,
-      title: 'UX Designer',
-      company: 'DesignHub',
-      location: 'Remote',
-      salary: '$90k - $120k',
-      type: 'Full-time',
-      posted: '1 day ago',
-      logo: 'https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=100&h=100&fit=crop',
-      description: 'Join our design team to create beautiful and intuitive user experiences...',
+      title: "UX Designer",
+      company: "DesignHub",
+      location: "Remote",
+      salary: "$90k - $120k",
+      type: "Full-time",
+      posted: "1 day ago",
+      logo: "https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=100&h=100&fit=crop",
+      description:
+        "Join our design team to create beautiful and intuitive user experiences...",
     },
     {
       id: 3,
-      title: 'Backend Engineer',
-      company: 'StartupX',
-      location: 'New York, NY',
-      salary: '$130k - $160k',
-      type: 'Full-time',
-      posted: '3 days ago',
-      logo: 'https://images.unsplash.com/photo-1549421263-5ec394a5ad4c?w=100&h=100&fit=crop',
-      description: 'Looking for a skilled Backend Engineer to help scale our infrastructure...',
+      title: "Backend Engineer",
+      company: "StartupX",
+      location: "New York, NY",
+      salary: "$130k - $160k",
+      type: "Full-time",
+      posted: "3 days ago",
+      logo: "https://images.unsplash.com/photo-1549421263-5ec394a5ad4c?w=100&h=100&fit=crop",
+      description:
+        "Looking for a skilled Backend Engineer to help scale our infrastructure...",
     },
   ];
 
@@ -64,13 +92,22 @@ function BrowseJobs() {
 
       {/* Job Listings */}
       <div className="space-y-4">
-        {jobs.map((job) => (
-          <div key={job.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        {allJobs.map((job) => (
+          <div
+            key={job._id}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"
+          >
             <div className="flex items-start justify-between">
               <div className="flex gap-4">
-                <img src={job.logo} alt={job.company} className="h-12 w-12 rounded-lg" />
+                {/* <img
+                  src={job.logo}
+                  alt={job.company}
+                  className="h-12 w-12 rounded-lg"
+                /> */}
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{job.title}</h2>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    {job.title}
+                  </h2>
                   <div className="mt-2 space-y-2">
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                       <Building className="h-4 w-4" />
@@ -86,12 +123,12 @@ function BrowseJobs() {
                         <span>{job.salary}</span>
                       </div>
                       <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                        <Briefcase className="h-4 w-4" />
-                        <span>{job.type}</span>
+                        <div>Experience Required :</div>
+                        <span>{job.minExperience} Years</span>
                       </div>
                       <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
                         <Clock className="h-4 w-4" />
-                        <span>{job.posted}</span>
+                        <span>{new Date(job.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>
@@ -101,7 +138,17 @@ function BrowseJobs() {
                 Apply Now
               </button>
             </div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">{job.description}</p>
+            {job.requiredSkills.map((skill, index) => (
+              <span
+                key={index}
+                className="inline-block bg-indigo-100 text-indigo-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full mt-4"
+              >
+                {skill}
+              </span>
+            ))}
+            <p className="mt-4 text-gray-600 dark:text-gray-400">
+              {job.description}
+            </p>
           </div>
         ))}
       </div>

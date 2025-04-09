@@ -69,7 +69,7 @@ function UserLayout() {
           }}
         />
         <main className="p-6">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-full h-full mx-auto">
             <Outlet />
           </div>
         </main>
