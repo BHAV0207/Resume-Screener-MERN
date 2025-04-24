@@ -8,6 +8,8 @@ import {
   Eye,
   ChevronLeft,
   ChevronRight,
+  XCircle,
+  TrendingUp,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { JobContext } from "../store/JobContext";
@@ -19,6 +21,10 @@ const PostedJobs = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [updateToggle, setUpdateToggle] = useState(false);
+  const [updatedTitle, setUpdatedTitle] = useState("");
+  const [updatedDescription, setUpdatedDescription] = useState("");
+  const [updatedStatus, setUpdatedStatus] = useState(TrendingUp);
+  const [selectedJobId, setSelectedJobId] = useState(null);
 
   const { totalJobs, handleJobCount, deleteJob, getJobById, job, updateJob } =
     useContext(JobContext);
@@ -39,9 +45,30 @@ const PostedJobs = () => {
     }
   }, [job]);
 
-  const handleUpdateJob = (id) => {
-    console.log(id);
-    setUpdateToggle(!updateToggle);
+  const handleToggle = (job) => {
+    setSelectedJobId(job._id);
+    setUpdatedTitle(job.title);
+    setUpdatedDescription(job.description);
+    setUpdatedStatus(job.active ? true : false); // optional
+    setUpdateToggle(true);
+  };
+
+  const handleUpdateSubmit = async (e) => {
+    e.preventDefault();
+
+    const updatedData = {
+      title: updatedTitle,
+      description: updatedDescription,
+      active: updatedStatus,
+    };
+
+    await updateJob(selectedJobId, updatedData);
+    setUpdateToggle(false);
+    setSelectedJobId(null);
+    setUpdatedTitle("");
+    setUpdatedDescription("");
+    setUpdatedStatus("active");
+    handleJobCount(); // Refresh job list
   };
 
   const filteredJobs = (totalJobs || []).filter((job) => {
@@ -170,7 +197,7 @@ const PostedJobs = () => {
                   <div className="flex items-center gap-2">
                     <button
                       className="p-1 hover:bg-orange-300 dark:hover:bg-amber-700 rounded-full"
-                      onClick={() => handleUpdateJob(job._id)}
+                      onClick={() => handleToggle(job)}
                     >
                       <Edit2 size={20} />
                     </button>
@@ -228,12 +255,73 @@ const PostedJobs = () => {
           onClick={() => setUpdateToggle(!updateToggle)}
         >
           <div
-            className="w-1/2 h-2/3 bg-white transition-all duration-300 rounded-lg shadow-lg flex justify-center items-center p-7"
+            className="w-1/2 h-2/3 bg-white transition-all duration-300 rounded-lg shadow-lg  justify-center p-7 relative"
             onClick={(e) => e.stopPropagation()}
           >
-            <div></div>
-            <div className=" bg-amber-200 w-full h-full p-5">
-                hello
+            <div
+              className="absolute top-1 right-1"
+              onClick={() => setUpdateToggle(!updateToggle)}
+            >
+              <XCircle></XCircle>
+            </div>
+            <div className="w-full h-full p-6 bg-white rounded-xl shadow-md">
+              <form onSubmit={handleUpdateSubmit}>
+                <div className="mb-4">
+                  <label
+                    htmlFor="title"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Job Title
+                  </label>
+                  <input
+                    id="title"
+                    placeholder="Enter job title"
+                    type="text"
+                    className="border border-gray-300 rounded-md w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={updatedTitle}
+                    onChange={(e) => setUpdatedTitle(e.target.value)}
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label
+                    htmlFor="description"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Job Description
+                  </label>
+                  <textarea
+                    id="description"
+                    placeholder="Enter job description"
+                    rows={4}
+                    className="border border-gray-300 rounded-md w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={updatedDescription}
+                    onChange={(e) => setUpdatedDescription(e.target.value)}
+                  />
+                </div>
+
+                <div className="mb-6">
+                  <label
+                    htmlFor="status"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Job Status
+                  </label>
+                  <select
+                    id="status"
+                    className="border border-gray-300 rounded-md w-full px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={updatedStatus}
+                    onChange={(e) => setUpdatedStatus(e.target.value)}
+                  >
+                    <option value="true">Active</option>
+                    <option value="false">Closed</option>
+                  </select>
+                </div>
+
+                <button className="w-full bg-indigo-600 hover:bg-indigo-700 transition text-white font-medium py-2 rounded-md">
+                  Update Job
+                </button>
+              </form>
             </div>
           </div>
         </div>

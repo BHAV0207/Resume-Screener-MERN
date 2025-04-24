@@ -136,29 +136,31 @@ export const JobProvider = ({ children }) => {
     }
   };
 
-  const updateJob = async (jobId) => {
+  const updateJob = async (jobId, updatedData) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         console.error("Token not found in localStorage");
         return;
       }
-
+  
       const res = await axios.put(
         `https://resume-screener-mern-1.onrender.com/api/jobs/${jobId}`,
+        updatedData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-
+  
       handleJobCount();
       console.log(res.data);
     } catch (err) {
-      console.error("Error deleting Job", err);
+      console.error("Error updating Job", err);
     }
   };
+  
 
   const getJobById = async (jobId) => {
     try {
