@@ -29,6 +29,26 @@ const ActiveJobs = () => {
       job.company.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleShare = (job) => {
+    console.log("1");
+    if (navigator.share) {
+      console.log("2");
+      navigator
+        .share({
+          title: job.title,
+          text: `check out this job as ${job.company}`,
+          url: window.location.href,
+        })
+        .then(() => console.log("Job shared successfully"))
+        .catch((error) => console.error("Error sharing job:", error));
+    } else {
+      const shareText = `Check out this job at ${job.company}: ${window.location.href}`;
+      navigator.clipboard.writeText(shareText).then(() => {
+        alert("Sharing not supported. Link copied to clipboard!");
+      });
+    }
+  };
+
   return (
     <div
       className={`p-5 bg-white ${
@@ -186,7 +206,10 @@ const ActiveJobs = () => {
                   </span>
                 </div>
               </div>
-              <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+              <button
+                className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                onClick={() => handleShare(job)}
+              >
                 <Share2 size={18} />
                 <span className="text-sm">Share</span>
               </button>

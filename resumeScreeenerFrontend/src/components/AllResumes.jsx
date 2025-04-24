@@ -284,18 +284,6 @@ const AllResumes = () => {
                 >
                   <Eye size={18} />
                 </button>
-                <button
-                  className="p-2 text-gray-600 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400"
-                  title="Shortlist"
-                >
-                  <ThumbsUp size={18} />
-                </button>
-                <button
-                  className="p-2 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
-                  title="Reject"
-                >
-                  <ThumbsDown size={18} />
-                </button>
               </div>
             </div>
           </div>

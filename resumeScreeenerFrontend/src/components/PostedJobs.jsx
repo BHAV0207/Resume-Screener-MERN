@@ -18,18 +18,19 @@ const PostedJobs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [updateToggle, setUpdateToggle] = useState(false);
 
-  const { totalJobs, handleJobCount, deleteJob , getJobById , job} = useContext(JobContext);
+  const { totalJobs, handleJobCount, deleteJob, getJobById, job, updateJob } =
+    useContext(JobContext);
   const { isDarkMode } = useContext(ThemeContext); // Access theme state
 
   useEffect(() => {
     handleJobCount();
   }, []);
 
-
   const handleApplicants = async (jobId) => {
-    await getJobById(jobId); 
-  }
+    await getJobById(jobId);
+  };
 
   useEffect(() => {
     // Navigate only after the job data has been updated
@@ -38,7 +39,11 @@ const PostedJobs = () => {
     }
   }, [job]);
 
-  
+  const handleUpdateJob = (id) => {
+    console.log(id);
+    setUpdateToggle(!updateToggle);
+  };
+
   const filteredJobs = (totalJobs || []).filter((job) => {
     const matchesSearch = job.title
       .toLowerCase()
@@ -59,7 +64,7 @@ const PostedJobs = () => {
     <div
       className={`p-6 h-[100vh] ${
         isDarkMode ? "bg-gray-900 text-white" : "bg-white text-gray-900"
-      }`}
+      } relative`}
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
@@ -155,12 +160,22 @@ const PostedJobs = () => {
                     {job.active ? "Active" : "Closed"}
                   </span>
                 </td>
-                <td onClick={() => handleApplicants(job._id)}
-                 className="py-3 px-4 cursor-pointer hover:bg-gray-200 rounded-3xl">{job.resumes.length}</td>
+                <td
+                  onClick={() => handleApplicants(job._id)}
+                  className="py-3 px-4 cursor-pointer hover:bg-gray-200 rounded-3xl"
+                >
+                  {job.resumes.length}
+                </td>
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-2">
                     <button
-                      className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                      className="p-1 hover:bg-orange-300 dark:hover:bg-amber-700 rounded-full"
+                      onClick={() => handleUpdateJob(job._id)}
+                    >
+                      <Edit2 size={20} />
+                    </button>
+                    <button
+                      className="p-1 hover:bg-gray-200 dark:hover:bg-red-700 rounded-full"
                       title="Delete"
                       onClick={() => deleteJob(job._id)}
                     >
@@ -206,6 +221,23 @@ const PostedJobs = () => {
           </button>
         </div>
       </div>
+
+      {updateToggle && (
+        <div
+          className="fixed top-0 left-0 w-screen h-screen bg-black/50 flex justify-center items-center"
+          onClick={() => setUpdateToggle(!updateToggle)}
+        >
+          <div
+            className="w-1/2 h-2/3 bg-white transition-all duration-300 rounded-lg shadow-lg flex justify-center items-center p-7"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div></div>
+            <div className=" bg-amber-200 w-full h-full p-5">
+                hello
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
