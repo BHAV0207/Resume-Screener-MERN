@@ -1,259 +1,175 @@
-import axios from "axios";
-import { createContext, useState } from "react";
+import { createContext, useState, useCallback } from "react";
+import axiosInstance from "../api/axiosInstance";
+import toast from "react-hot-toast";
 
 export const JobContext = createContext();
 
 export const JobProvider = ({ children }) => {
-  const [totalJobs, setTotalJobs] = useState(null);
-  const [activeJobs, setActiveJobs] = useState(null);
-  const [resumes, setResumes] = useState(null);
-  const [allResume, setAllResume] = useState([]);
+  const [totalJobs, setTotalJobs] = useState([]);
+  const [activeJobs, setActiveJobs] = useState([]);
+  const [resumes, setResumes] = useState([]);
   const [shortlisted, setShortlisted] = useState([]);
-  const [job , setJob] = useState("");
-  const [allJobs , setAllJobs] = useState([]);
-  const [applied, setApplied] = useState(false);
+  const [currentJob, setCurrentJob] = useState(null);
+  const [allJobs, setAllJobs] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleJobCount = async () => {
+  const fetchAdminJobStats = useCallback(async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user?.id) return;
+
+    setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("Token not found in localStorage");
-        return;
-      }
-
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user?.id) {
-        console.error("User ID not found in localStorage");
-        return;
-      }
-
-      const response = await axios.get(
-        `https://resume-screener-mern-1.onrender.com/api/jobs/${user.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Pass token in headers
-          },
-        }
-      );
-
-      const res = await axios.get(
-        `https://resume-screener-mern-1.onrender.com/api/jobs/${user.id}?active=true`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Pass token in headers
-          },
-        }
-      );
-
-      const activeJobsCount = res.data;
-      const jobCount = response.data;
-
-      console.log(jobCount);
-      console.log(activeJobsCount);
-
-      setTotalJobs(jobCount);
-      setActiveJobs(activeJobsCount);
+      const allJobsRes = await axiosInstance.get(`/jobs/${user.id}`);
+      const activeJobsRes = await axiosInstance.get(`/jobs/${user.id}?active=true`);
+      
+      setTotalJobs(allJobsRes.data.data || []);
+      setActiveJobs(activeJobsRes.data.data || []);
     } catch (err) {
-      console.error("Error fetching job count:", err);
+      console.error("Error fetching job stats:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchAdminResumes = useCallback(async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user?.id) return;
+
+    setLoading(true);
+    try {
+      const res = await axiosInstance.get(`/jobs/${user.id}/resumes`);
+      setResumes(res.data.data.resumes || []);
+    } catch (err) {
+      console.error("Error fetching admin resumes:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchShortlistedResumes = useCallback(async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user?.id) return;
+
+    try {
+      const res = await axiosInstance.get(`/resumes/shortlisted/${user.id}`);
+      setShortlisted(res.data.data || []);
+    } catch (err) {
+      console.error("Error fetching shortlisted resumes:", err);
+    }
+  }, []);
+
+  const getJobById = async (jobId) => {
+    setLoading(true);
+    try {
+      const res = await axiosInstance.get(`/jobs/job/${jobId}`);
+      setCurrentJob(res.data.data);
+      return res.data.data;
+    } catch (err) {
+      toast.error("Error fetching job details");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleResumesCount = async () => {
+  const getAllJobs = async () => {
+    setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("Token not found in localStorage");
-        return;
-      }
-
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user?.id) {
-        console.error("User ID not found in localStorage");
-        return;
-      }
-
-      const response = await axios.get(
-        `https://resume-screener-mern-1.onrender.com/api/jobs/${user.id}/resumes`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      setResumes(response.data);
-      setAllResume(response.data.resumes);
+      const res = await axiosInstance.get("/jobs");
+      setAllJobs(res.data.data || []);
     } catch (err) {
-      console.error("Error fetching resumes count:", err);
+      toast.error("Error fetching jobs");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const shortlistedResumes = async () => {
+  const createJob = async (jobData) => {
+    setLoading(true);
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user?.id) {
-        console.error("User ID not found in localStorage");
-        return;
-      }
-
-      const response = await axios.get(
-        `https://resume-screener-mern-1.onrender.com/api/resumes/shortlisted/${user.id}`
-      );
-      console.log(response.data);
-      setShortlisted(response.data.shortlistedResumes);
+      await axiosInstance.post("/jobs/create", jobData);
+      toast.success("Job created successfully!");
+      fetchAdminJobStats();
     } catch (err) {
-      console.error("Error fetching shortlisted Resumes count:", err);
+      toast.error(err.response?.data?.message || "Error creating job");
+    } finally {
+      setLoading(false);
     }
   };
-
-  // const getJobById = async (jobId) => {
-  //   try{
-  //     const response = await axios.get(`https://resume-screener-mern-1.onrender.com/api/jobs/${jobId}`)
-  //   }catch(err){
-
-  //   }
-  // }
 
   const deleteJob = async (jobId) => {
+    if (!window.confirm("Are you sure you want to delete this job?")) return;
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("Token not found in localStorage");
-        return;
-      }
-
-      const res = await axios.delete(
-        `https://resume-screener-mern-1.onrender.com/api/jobs/${jobId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      handleJobCount();
-      console.log(res.data);
+      await axiosInstance.delete(`/jobs/${jobId}`);
+      toast.success("Job deleted successfully");
+      fetchAdminJobStats();
     } catch (err) {
-      console.error("Error deleting Job", err);
+      toast.error("Error deleting job");
     }
   };
 
   const updateJob = async (jobId, updatedData) => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("Token not found in localStorage");
-        return;
-      }
-  
-      const res = await axios.put(
-        `https://resume-screener-mern-1.onrender.com/api/jobs/${jobId}`,
-        updatedData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-  
-      handleJobCount();
-      console.log(res.data);
+      await axiosInstance.put(`/jobs/${jobId}`, updatedData);
+      toast.success("Job updated successfully");
+      fetchAdminJobStats();
     } catch (err) {
-      console.error("Error updating Job", err);
-    }
-  };
-  
-
-  const getJobById = async (jobId) => {
-    try {
-      const res = await axios.get(
-        `https://resume-screener-mern-1.onrender.com/api/jobs/job/${jobId}`
-      );
-      setJob(res.data); // Set the job data in the state
-    } catch (err) {
-      console.error("Error fetching job by ID:", err);
+      toast.error("Error updating job");
     }
   };
 
-  const getAllJobs = async () => {
-    try{
-      const res = await axios.get(
-        `https://resume-screener-mern-1.onrender.com/api/jobs`
-      );
-      setAllJobs(res.data);
-    }
-    catch(err){
-      console.error("Error fetching all jobs:", err);
-    }
-  } 
-
-
-const applyForJob = async (file, jobId) => {
-  try {
-    const token = localStorage.getItem("token");
+  const applyForJob = async (file, jobId) => {
     const user = JSON.parse(localStorage.getItem("user"));
+    if (!user?.id) return;
 
-    if (!token) {
-      console.error("Token not found in localStorage");
-      return;
-    }
-
-    if (!user?.id) {
-      console.error("User ID not found in localStorage");
-      return;
-    }
-
-    // Prepare form data
     const formData = new FormData();
-    formData.append('resume', file);  // Resume file
-    formData.append('name', user.name || "Unknown");  // Name
-    formData.append('email', user.email || "No Email");  // Email
-    formData.append('jobId', jobId);  // Job ID
+    formData.append('resume', file);
+    formData.append('name', user.name || "Unknown");
+    formData.append('email', user.email || "No Email");
+    formData.append('jobId', jobId);
 
-    // Send request to backend
-    const response = await axios.post("https://resume-screener-mern-1.onrender.com/api/resumes/upload", formData, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data' // Set Content-Type for file upload
-      }
-    });
-
-    if (response.status === 201) {
-      console.log('Resume uploaded successfully:', response.data);
-      alert('Job application submitted successfully!');
-      setApplied(true);
-    } else {
-      console.error('Error submitting resume:', response.data.error);
-      alert(`Error: ${response.data.error}`);
+    setLoading(true);
+    try {
+      await axiosInstance.post("/resumes/upload", formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      toast.success("Application submitted successfully!");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Error submitting application");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Error applying for job:", err.message);
-    alert('There was an error submitting your application.');
-  }
-};
+  };
 
-  
+  const processCandidate = async (jobId, resumeId, action) => {
+    try {
+      await axiosInstance.post("/jobs/process", { jobId, resumeId, action });
+      toast.success(`Candidate ${action}ed successfully`);
+      getJobById(jobId); // Refresh job details to show updated status
+    } catch (err) {
+      toast.error(`Error ${action}ing candidate`);
+    }
+  };
+
   return (
     <JobContext.Provider
       value={{
-        setActiveJobs,
-        setTotalJobs,
         totalJobs,
         activeJobs,
-        handleJobCount,
-        handleResumesCount,
-        setResumes,
         resumes,
-        allResume,
-        shortlistedResumes,
         shortlisted,
+        currentJob,
+        allJobs,
+        loading,
+        fetchAdminJobStats,
+        fetchAdminResumes,
+        fetchShortlistedResumes,
+        getJobById,
+        getAllJobs,
+        createJob,
         deleteJob,
         updateJob,
-        getJobById,
-        job,
-        getAllJobs,
-        allJobs,
         applyForJob,
-        setApplied,
-        applied,
+        processCandidate,
       }}
     >
       {children}

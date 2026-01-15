@@ -2,7 +2,6 @@ import React, { useEffect, useState, useContext } from "react";
 import { Outlet } from "react-router-dom";
 import UserSidebar from "../UserComponents/Sidebar";
 import UserHeader from "../UserComponents/Header";
-import { ThemeContext } from "../store/ThemeContext";
 
 
 function UserLayout() {
@@ -10,7 +9,7 @@ function UserLayout() {
   const [isMobile, setIsMobile] = useState(false);
   const [user, setUser] = useState("");
 
-  const { isDarkMode } = useContext(ThemeContext);
+  // const { isDarkMode } = useContext(ThemeContext);
 
   useEffect(() => {
     const fetchedUser = () => {
@@ -36,14 +35,10 @@ function UserLayout() {
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
   return (
-    <div
-      className={`min-h-screen ${
-        isDarkMode ? "dark bg-gray-900" : "bg-gray-50"
-      }`}
-    >
+    <div className="min-h-screen bg-slate-50/50">
       {isMobile && isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-20"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50"
           onClick={toggleSidebar}
         />
       )}
@@ -54,8 +49,8 @@ function UserLayout() {
       />
 
       <div
-        className={`transition-all duration-300 ${
-          isSidebarOpen ? "md:ml-64" : "md:ml-16"
+        className={`transition-all duration-700 ${
+          isSidebarOpen ? "md:ml-80" : "md:ml-24"
         }`}
       >
         <UserHeader
@@ -68,7 +63,7 @@ function UserLayout() {
               "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
           }}
         />
-        <main className="p-6">
+        <main className="p-4 md:p-8">
           <div className="max-w-full h-full mx-auto">
             <Outlet />
           </div>

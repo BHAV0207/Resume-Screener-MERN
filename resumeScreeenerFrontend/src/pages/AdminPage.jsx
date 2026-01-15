@@ -34,10 +34,10 @@ function AdminLayout() {
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50/50">
       {isMobile && isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-20"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50"
           onClick={toggleSidebar}
         />
       )}
@@ -49,7 +49,7 @@ function AdminLayout() {
       />
 
       {/* Main Content */}
-      <div className={`transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-16'}`}>
+      <div className={`transition-all duration-700 ${isSidebarOpen ? 'md:ml-80' : 'md:ml-24'}`}>
         <Header 
           toggleSidebar={toggleSidebar} 
           isSidebarOpen={isSidebarOpen}
@@ -59,7 +59,7 @@ function AdminLayout() {
             avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
           }}
         />
-        <main className="">
+        <main className="p-4 md:p-8">
           <div className="max-w-full mx-auto">
             <Outlet />
           </div>

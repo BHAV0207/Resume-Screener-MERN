@@ -1,283 +1,176 @@
-import { BriefcaseIcon } from "lucide-react";
 import React, { useContext, useState } from "react";
-import axios from "axios";
 import { JobContext } from "../store/JobContext";
-import { ThemeContext } from "../store/ThemeContext"; // Import ThemeContext
+import { Briefcase, Building, MapPin, DollarSign, List, GraduationCap, AlignLeft, Send, Loader2, Zap } from "lucide-react";
 
 function PostJobs() {
-  const [title, setTitle] = useState("");
-  const [company, setCompany] = useState("");
-  const [salary, setSalary] = useState("");
-  const [location, setLocation] = useState("");
-  const [skills, setSkills] = useState("");
-  const [skillsArray, setSkillsArray] = useState([]);
-  const [experience, setExperience] = useState("");
-  const [description, setDescription] = useState("");
-  const [errors, setError] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { createJob, loading } = useContext(JobContext);
+  const [formData, setFormData] = useState({
+    title: "",
+    company: "",
+    salary: "",
+    location: "",
+    skills: "",
+    minExperience: 0,
+    description: ""
+  });
 
-  const { handleJobCount } = useContext(JobContext);
-  const { isDarkMode } = useContext(ThemeContext); // Accessing theme context
-
-  const handleSkillsArray = (e) => {
-    let input = e.target.value;
-    setSkills(input);
-
-    const skillsList = input
-      .split(",")
-      .map((skill) => skill.trim())
-      .filter((skill) => skill !== "");
-
-    setSkillsArray(skillsList);
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    let formErrors = {};
-    if (!title) formErrors.title = "Title is required";
-    if (!company) formErrors.company = "Company name is required";
-    if (!salary) formErrors.salary = "Salary is required";
-    if (!location) formErrors.location = "Location is required";
-    if (skillsArray.length === 0)
-      formErrors.skills = "At least one skill is required";
-    if (!description) formErrors.description = "Description is required";
-
-    if (Object.keys(formErrors).length > 0) {
-      setError(formErrors);
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError({ submit: "Authentication token not found." });
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      const res = await axios.post(
-        `https://resume-screener-mern-1.onrender.com/api/jobs/create`,
-        {
-          title,
-          description,
-          requiredSkills: skillsArray,
-          minExperience: experience,
-          company,
-          location,
-          salary,
-        },
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      handleJobCount();
-      setIsSubmitting(false);
-      console.log(res.data);
-    } catch (err) {
-      setIsSubmitting(false);
-      console.error(err);
-      setError({ submit: "Failed to post job, please try again." });
+    const skillsArray = formData.skills.split(",").map(s => s.trim()).filter(Boolean);
+    const dataToSend = { ...formData, requiredSkills: skillsArray };
+    delete dataToSend.skills;
+    
+    await createJob(dataToSend);
+    if (!loading) {
+      setFormData({
+        title: "",
+        company: "",
+        salary: "",
+        location: "",
+        skills: "",
+        minExperience: 0,
+        description: ""
+      });
     }
   };
 
   return (
-    <div
-      className={`max-w-full h-[100vh] mx-auto p-6 ${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-white text-gray-900"
-      }`}
-    >
-      <div className="flex items-center gap-3 mb-8">
-        <BriefcaseIcon className="w-8 h-8 text-blue-600" />
-        <h1 className="text-3xl font-bold">Post a New Job</h1>
+    <div className="p-6 ml-8 max-w-4xl sm:max-w-6xl md:max-w-8xl mx-auto animate-in fade-in duration-500">
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Post a New Position</h1>
+          <p className="text-slate-500 font-medium">Create a job opening to start receiving AI-screened resumes</p>
+        </div>
+        <div className="hidden md:flex w-14 h-14 bg-emerald-600 rounded-2xl items-center justify-center shadow-lg shadow-emerald-900/20 group hover:rotate-6 transition-transform">
+           <Briefcase className="text-white w-7 h-7" />
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div
-          className={`shadow-md rounded-lg p-6 space-y-6 ${
-            isDarkMode ? "bg-gray-800" : "bg-gray-100"
-          }`}
-        >
-          {/* Job Title */}
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium">
-              Job Title *
-            </label>
-            <input
-              type="text"
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className={`mt-1 block w-full rounded-md border ${
-                isDarkMode
-                  ? "border-gray-700 bg-gray-900 text-white"
-                  : "border-gray-300 bg-gray-50"
-              }`}
-              placeholder="e.g., Senior Software Engineer"
-            />
-            {errors.title && (
-              <p className="mt-1 text-sm text-red-600">{errors.title}</p>
-            )}
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Left Column */}
+          <div className="space-y-6">
+            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-4">
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center">
+                <Building className="w-4 h-4 mr-2 text-emerald-500" /> Company & Role
+              </h3>
+              
+              <FormInput 
+                label="Job Title" 
+                name="title" 
+                value={formData.title} 
+                onChange={handleChange} 
+                placeholder="e.g. Senior Frontend Engineer"
+                required
+              />
+              <FormInput 
+                label="Company Name" 
+                name="company" 
+                value={formData.company} 
+                onChange={handleChange} 
+                placeholder="e.g. Acme Inc"
+                required
+              />
+            </div>
+
+            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-4">
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center">
+                <MapPin className="w-4 h-4 mr-2 text-emerald-500" /> Logistics
+              </h3>
+              <FormInput 
+                label="Location" 
+                name="location" 
+                value={formData.location} 
+                onChange={handleChange} 
+                placeholder="e.g. Remote / New York"
+                required
+              />
+              <FormInput 
+                label="Salary Range" 
+                name="salary" 
+                value={formData.salary} 
+                onChange={handleChange} 
+                placeholder="e.g. $120k - $150k"
+                required
+              />
+            </div>
           </div>
 
-          {/* Company */}
-          <div>
-            <label htmlFor="company" className="block text-sm font-medium">
-              Company Name *
-            </label>
-            <input
-              type="text"
-              id="company"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              className={`mt-1 block w-full rounded-md border ${
-                isDarkMode
-                  ? "border-gray-700 bg-gray-900 text-white"
-                  : "border-gray-300 bg-gray-50"
-              }`}
-              placeholder="e.g., Tech Corp"
-            />
-            {errors.company && (
-              <p className="mt-1 text-sm text-red-600">{errors.company}</p>
-            )}
+          {/* Right Column */}
+          <div className="space-y-6">
+            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-4">
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center">
+                <List className="w-4 h-4 mr-2 text-emerald-500" /> Requirements
+              </h3>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 ml-1">Required Skills (Comma separated)</label>
+                <textarea
+                   name="skills"
+                   value={formData.skills}
+                   onChange={handleChange}
+                   placeholder="React, Tailwind, Node.js..."
+                   className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-50 focus:border-emerald-600 outline-none transition-all placeholder:text-slate-400 font-medium h-28 resize-none shadow-inner"
+                   required
+                />
+              </div>
+              <FormInput 
+                label="Min Experience (Years)" 
+                name="minExperience" 
+                type="number"
+                value={formData.minExperience} 
+                onChange={handleChange} 
+                required
+              />
+            </div>
           </div>
+        </div>
 
-          {/* Location */}
-          <div>
-            <label htmlFor="location" className="block text-sm font-medium">
-              Location *
-            </label>
-            <input
-              type="text"
-              id="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className={`mt-1 block w-full rounded-md border ${
-                isDarkMode
-                  ? "border-gray-700 bg-gray-900 text-white"
-                  : "border-gray-300 bg-gray-50"
-              }`}
-              placeholder="e.g., New York, NY"
-            />
-            {errors.location && (
-              <p className="mt-1 text-sm text-red-600">{errors.location}</p>
-            )}
-          </div>
+        {/* Description - Full Width */}
+        <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-4">
+          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center">
+            <AlignLeft className="w-4 h-4 mr-2 text-emerald-500" /> Job Description
+          </h3>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Describe the role, responsibilities, and benefits..."
+            className="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-[2rem] focus:bg-white focus:ring-4 focus:ring-emerald-50 focus:border-emerald-600 outline-none transition-all placeholder:text-slate-400 font-medium h-60 resize-none shadow-inner"
+            required
+          />
+        </div>
 
-          {/* Salary */}
-          <div>
-            <label htmlFor="salary" className="block text-sm font-medium">
-              Salary Range *
-            </label>
-            <input
-              type="text"
-              id="salary"
-              value={salary}
-              onChange={(e) => setSalary(e.target.value)}
-              className={`mt-1 block w-full rounded-md border ${
-                isDarkMode
-                  ? "border-gray-700 bg-gray-900 text-white"
-                  : "border-gray-300 bg-gray-50"
-              }`}
-              placeholder="e.g., $80,000 - $120,000"
-            />
-            {errors.salary && (
-              <p className="mt-1 text-sm text-red-600">{errors.salary}</p>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={loading}
+            className="group bg-slate-900 text-white px-12 py-5 rounded-[2rem] font-black text-lg shadow-2xl shadow-slate-100 hover:bg-black transition-all active:scale-[0.98] disabled:opacity-70 flex items-center uppercase tracking-widest"
+          >
+            {loading ? <Loader2 className="w-6 h-6 animate-spin mr-3" /> : (
+              <>
+                <Zap className="w-5 h-5 mr-3 text-emerald-500 group-hover:scale-125 transition-transform" fill="currentColor" />
+                Deploy Position
+              </>
             )}
-          </div>
-
-          {/* Required Skills */}
-          <div>
-            <label
-              htmlFor="requiredSkills"
-              className="block text-sm font-medium"
-            >
-              Required Skills *
-            </label>
-            <input
-              type="text"
-              id="requiredSkills"
-              value={skills}
-              onChange={handleSkillsArray}
-              className={`mt-1 block w-full rounded-md border ${
-                isDarkMode
-                  ? "border-gray-700 bg-gray-900 text-white"
-                  : "border-gray-300 bg-gray-50"
-              }`}
-              placeholder="e.g., React, Node.js, TypeScript (comma-separated)"
-            />
-            {errors.skills && (
-              <p className="mt-1 text-sm text-red-600">{errors.skills}</p>
-            )}
-          </div>
-
-          {/* Minimum Experience */}
-          <div>
-            <label
-              htmlFor="minExperience"
-              className="block text-sm font-medium"
-            >
-              Minimum Experience (years)
-            </label>
-            <input
-              type="number"
-              id="minExperience"
-              value={experience}
-              onChange={(e) => setExperience(e.target.value)}
-              className={`mt-1 block w-full rounded-md border ${
-                isDarkMode
-                  ? "border-gray-700 bg-gray-900 text-white"
-                  : "border-gray-300 bg-gray-50"
-              }`}
-              min="0"
-            />
-            {errors.experience && (
-              <p className="mt-1 text-sm text-red-600">{errors.experience}</p>
-            )}
-          </div>
-
-          {/* Job Description */}
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium">
-              Job Description *
-            </label>
-            <textarea
-              id="description"
-              rows={6}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className={`mt-1 block w-full rounded-md border ${
-                isDarkMode
-                  ? "border-gray-700 bg-gray-900 text-white"
-                  : "border-gray-300 bg-gray-50"
-              }`}
-              placeholder="Enter detailed job description..."
-            />
-            {errors.description && (
-              <p className="mt-1 text-sm text-red-600">{errors.description}</p>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className={`px-6 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                isSubmitting ? "opacity-75 cursor-not-allowed" : ""
-              }`}
-            >
-              {isSubmitting ? "Posting..." : "Post Job"}
-            </button>
-          </div>
+          </button>
         </div>
       </form>
     </div>
   );
 }
+
+const FormInput = ({ label, ...props }) => (
+  <div className="space-y-2">
+    <label className="text-sm font-bold text-slate-700 ml-1">{label}</label>
+    <input
+      {...props}
+      className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-50 focus:border-emerald-600 outline-none transition-all placeholder:text-slate-400 font-medium shadow-inner"
+    />
+  </div>
+);
 
 export default PostJobs;

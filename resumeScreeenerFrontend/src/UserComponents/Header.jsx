@@ -1,75 +1,58 @@
-import React, { useContext } from "react";
-import { Menu, Bell, Search, Sun, Moon } from "lucide-react";
-import { ThemeContext } from "../store/ThemeContext";
+import React from "react";
+import { Menu, Bell, Search, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const UserHeader = ({ toggleSidebar, isSidebarOpen, userInfo }) => {
-  const { setIsDarkMode, isDarkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
 
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle("dark");
-  };
-
   return (
-    <header className={`border-b ${isDarkMode ? 'border-gray-700 bg-gray-800 text-white' : 'border-gray-200 bg-white'} sticky top-0 z-30`}>
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={toggleSidebar}
-              className={`p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                isDarkMode ? 'text-gray-200' : 'text-gray-500'
-              }`}
-            >
-              <Menu size={24} />
-            </button>
-            <div className="relative max-w-xs">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <Search className={`h-5 w-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-              </div>
-              <input
-                type="text"
-                placeholder="Search jobs..."
-                className={`block w-full rounded-md border-0 py-1.5 pl-10 pr-3 ${
-                  isDarkMode 
-                    ? 'bg-gray-700 text-white placeholder:text-gray-400 focus:ring-indigo-500' 
-                    : 'bg-gray-50 text-gray-900 placeholder:text-gray-500 focus:ring-indigo-600'
-                } sm:text-sm sm:leading-6`}
-              />
-            </div>
+    <header className="h-24 bg-white/60 backdrop-blur-2xl sticky top-0 z-50 border-b border-slate-100 px-8 md:px-12">
+      <div className="h-full flex items-center justify-between gap-8">
+        <div className="flex items-center gap-6">
+          <button
+            onClick={toggleSidebar}
+            className="p-3.5 rounded-2xl bg-slate-900 text-white hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200 lg:hidden"
+          >
+            <Menu size={22} />
+          </button>
+          
+          <div className="flex md:flex items-center space-x-3 group cursor-pointer lg:hidden">
+             <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white shadow-xl shadow-emerald-900/40 group-hover:rotate-12 transition-all">
+                <Star size={20} fill="white" className="text-white" />
+             </div>
+             <span className="font-black text-slate-900 tracking-tighter text-xl uppercase leading-none">AIBatch</span>
           </div>
+        </div>
 
-          <div className="flex items-center gap-4">
-            <button
-              onClick={toggleTheme}
-              className={`p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                isDarkMode ? 'text-gray-200' : 'text-gray-500'
-              }`}
-            >
-              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
+        <div className="flex items-center gap-4 sm:gap-8">
+          <button className="relative p-3.5 rounded-2xl text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all group">
+            <Bell size={22} className="group-hover:rotate-12 transition-transform" />
+            <span className="absolute top-3.5 right-3.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse" />
+          </button>
+          
+          <div className="h-10 w-[1px] bg-slate-100 hidden sm:block" />
 
-            <div 
-              className="flex items-center cursor-pointer"
-              onClick={() => navigate("/user/profile")}
-            >
+          {/* User Info */}
+          <button 
+            onClick={() => navigate("/user/profile")}
+            className="flex items-center gap-4 p-1.5 pr-5 rounded-[2rem] hover:bg-slate-50 transition-all group"
+          >
+            <div className="h-12 w-12 rounded-2xl overflow-hidden shadow-2xl shadow-slate-200 ring-4 ring-white group-hover:ring-emerald-50 transition-all">
               <img
-                className="h-8 w-8 rounded-full"
-                src={userInfo.avatar}
+                src={userInfo.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop'}
                 alt={userInfo.name}
+                className="h-full w-full object-cover transition-transform group-hover:scale-110"
               />
-              <div className="hidden md:flex ml-2 flex-col">
-                <span className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                  {userInfo.name}
-                </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {userInfo.role}
-                </span>
-              </div>
             </div>
-          </div>
+            <div className="hidden lg:flex flex-col text-left">
+              <span className="text-sm font-black text-slate-900 tracking-tight leading-none group-hover:text-emerald-600 transition-colors uppercase">
+                {userInfo.name || 'Candidate Node'}
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 mt-1">
+                Active Protocol // {userInfo.role || 'Talent'}
+              </span>
+            </div>
+          </button>
         </div>
       </div>
     </header>

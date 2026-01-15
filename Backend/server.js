@@ -21,6 +21,8 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const errorHandler = require("./src/middleware/errorHandler");
+
 // Connect to Database
 connectDB();
 
@@ -28,6 +30,14 @@ connectDB();
 app.use("/api/resumes", require("./src/routes/resumeRoutes"));
 app.use("/api/jobs", require("./src/routes/jobRoutes"));
 app.use("/api/user", require("./src/routes/authRoutes"));
+
+// 404 Handler
+app.use((req, res, next) => {
+  res.status(404).json({ success: false, message: "Route not found" });
+});
+
+// Global Error Handler
+app.use(errorHandler);
 
 // Start Server
 const PORT = process.env.PORT || 5000;

@@ -1,17 +1,17 @@
 import React from 'react';
-import { CheckCircle, Clock, XCircle } from 'lucide-react';
+import { CheckCircle2, Clock, XCircle, Building, Calendar, ArrowRight, MessageSquare, Briefcase } from 'lucide-react';
 
 function Applications() {
+  // Keeping the sample data for now as per current project architecture
   const applications = [
     {
       id: 1,
       position: 'Senior Frontend Developer',
       company: 'TechCorp',
       appliedDate: '2024-03-10',
-      status: 'accepted',
-      logo: 'https://images.unsplash.com/photo-1516387938699-a93567ec168e?w=100&h=100&fit=crop',
-      nextStep: 'Schedule onboarding call',
-      feedback: 'Great technical skills and cultural fit',
+      status: 'shortlisted',
+      nextStep: 'Final matching interview with CEO',
+      feedback: 'Excellent resume score (92%). Skills perfectly aligned with stack.',
     },
     {
       id: 2,
@@ -19,9 +19,8 @@ function Applications() {
       company: 'DesignHub',
       appliedDate: '2024-03-12',
       status: 'pending',
-      logo: 'https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=100&h=100&fit=crop',
-      nextStep: 'Technical interview scheduled for March 20',
-      feedback: 'Portfolio review in progress',
+      nextStep: 'AI Screening in progress',
+      feedback: 'Waiting for AI analysis completion.',
     },
     {
       id: 3,
@@ -29,91 +28,114 @@ function Applications() {
       company: 'StartupX',
       appliedDate: '2024-03-08',
       status: 'rejected',
-      logo: 'https://images.unsplash.com/photo-1549421263-5ec394a5ad4c?w=100&h=100&fit=crop',
       nextStep: null,
-      feedback: 'Looking for more experience with cloud infrastructure',
+      feedback: 'Experience level below minimum requirement (Requires 5+ years).',
     },
   ];
 
-  const getStatusIcon = (status) => {
+  const getStatusConfig = (status) => {
     switch (status) {
-      case 'accepted':
-        return <CheckCircle className="h-6 w-6 text-green-500" />;
+      case 'shortlisted':
+        return {
+          icon: <CheckCircle2 className="h-5 w-5" />,
+          color: 'text-emerald-700 bg-emerald-50 border-emerald-100',
+          dot: 'bg-emerald-500'
+        };
       case 'pending':
-        return <Clock className="h-6 w-6 text-yellow-500" />;
+        return {
+          icon: <Clock className="h-5 w-5" />,
+          color: 'text-amber-700 bg-amber-50 border-amber-100',
+          dot: 'bg-amber-500'
+        };
       case 'rejected':
-        return <XCircle className="h-6 w-6 text-red-500" />;
+        return {
+          icon: <XCircle className="h-5 w-5" />,
+          color: 'text-rose-700 bg-rose-50 border-rose-100',
+          dot: 'bg-rose-500'
+        };
       default:
-        return null;
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'accepted':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'rejected':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      default:
-        return '';
+        return {
+          icon: <Clock className="h-5 w-5" />,
+          color: 'text-slate-700 bg-slate-50 border-slate-100',
+          dot: 'bg-slate-400'
+        };
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Applications</h1>
-        <div className="flex gap-2">
-          <div className="flex items-center gap-1">
-            <div className="h-3 w-3 rounded-full bg-green-500"></div>
-            <span className="text-sm text-gray-600 dark:text-gray-400">Accepted</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
-            <span className="text-sm text-gray-600 dark:text-gray-400">Pending</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="h-3 w-3 rounded-full bg-red-500"></div>
-            <span className="text-sm text-gray-600 dark:text-gray-400">Rejected</span>
-          </div>
+    <div className="p-8 ml-8 space-y-10 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">Application Tracking //</h1>
+          <p className="text-emerald-500 font-black uppercase text-[10px] tracking-[0.4em] mt-2">Active protocol monitoring • Deployment status live</p>
+        </div>
+        <div className="flex gap-6 bg-white px-6 py-4 rounded-[1.5rem] border border-slate-100 shadow-sm">
+           {['shortlisted', 'pending', 'rejected'].map(s => (
+             <div key={s} className="flex items-center gap-3">
+                <div className={`w-2.5 h-2.5 rounded-full ${getStatusConfig(s).dot} shadow-inner`} />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{s}</span>
+             </div>
+           ))}
         </div>
       </div>
 
-      <div className="space-y-4">
-        {applications.map((application) => (
-          <div key={application.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <div className="flex items-start justify-between">
-              <div className="flex gap-4">
-                <img src={application.logo} alt={application.company} className="h-12 w-12 rounded-lg" />
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{application.position}</h2>
-                  <p className="text-gray-600 dark:text-gray-400">{application.company}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Applied on {application.appliedDate}</p>
+      <div className="space-y-8">
+        {applications.map((app) => {
+          const config = getStatusConfig(app.status);
+          return (
+            <div key={app.id} className="group bg-white rounded-[3.5rem] p-10 border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-emerald-900/10 transition-all duration-500 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-[4.5rem] -z-0 opacity-0 group-hover:opacity-100 transition-all pointer-events-none" />
+              
+              <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-8 relative z-10">
+                <div className="flex gap-8">
+                  <div className="w-20 h-20 bg-slate-900 rounded-[2.5rem] flex items-center justify-center text-white shadow-2xl shadow-slate-300 group-hover:bg-emerald-600 transition-all group-hover:rotate-6">
+                    <Building size={32} />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-black text-slate-900 group-hover:text-emerald-600 transition-colors uppercase tracking-tight leading-none mb-3">{app.position}</h2>
+                    <div className="flex flex-wrap gap-5">
+                       <span className="flex items-center text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                          <Building className="w-4 h-4 mr-2 text-emerald-500" /> {app.company}
+                       </span>
+                       <span className="flex items-center text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                          <Calendar className="w-4 h-4 mr-2 text-emerald-500" /> Applied {app.appliedDate}
+                       </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-end gap-3">
+                  <span className={`flex items-center px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border ${config.color} shadow-sm group-hover:shadow-md transition-shadow`}>
+                    <span className="mr-3">{config.icon}</span>
+                    {app.status}
+                  </span>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                {getStatusIcon(application.status)}
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(application.status)}`}>
-                  {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-                </span>
+
+              <div className="mt-10 pt-10 border-t border-slate-50 grid grid-cols-1 md:grid-cols-2 gap-10">
+                 <div className="bg-slate-900 p-8 rounded-[2.5rem] border border-white/5 shadow-2xl shadow-slate-200 group-hover:ring-2 group-hover:ring-emerald-500/20 transition-all">
+                    <div className="flex items-center text-emerald-500 font-black text-[10px] uppercase tracking-[0.2em] mb-3">
+                       <ArrowRight className="w-4 h-4 mr-2" /> Current Phase
+                    </div>
+                    <p className="text-white text-lg font-black tracking-tight">{app.nextStep || 'Deployment Finalized'}</p>
+                 </div>
+                 
+                 <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 group-hover:bg-emerald-50/30 transition-colors">
+                    <div className="flex items-center text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] mb-3">
+                       <MessageSquare className="w-4 h-4 mr-2" /> Neural Feedback
+                    </div>
+                    <p className="text-slate-600 font-bold italic text-sm leading-relaxed">"{app.feedback}"</p>
+                 </div>
+              </div>
+
+              <div className="mt-10 flex justify-end">
+                 <button className="flex items-center text-emerald-600 font-black text-[10px] uppercase tracking-[0.3em] hover:text-emerald-500 hover:translate-x-1 transition-all group/btn bg-emerald-50 px-6 py-3 rounded-[1.5rem]">
+                    Analyze Node Context <Briefcase className="ml-3 w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                 </button>
               </div>
             </div>
-            <div className="mt-4 space-y-2">
-              {application.nextStep && (
-                <div className="text-sm">
-                  <span className="font-medium text-gray-900 dark:text-white">Next Step: </span>
-                  <span className="text-gray-600 dark:text-gray-400">{application.nextStep}</span>
-                </div>
-              )}
-              <div className="text-sm">
-                <span className="font-medium text-gray-900 dark:text-white">Feedback: </span>
-                <span className="text-gray-600 dark:text-gray-400">{application.feedback}</span>
-              </div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

@@ -2,207 +2,114 @@ const pdfParse = require("pdf-parse");
 const Resume = require("../models/resume");
 const Job = require("../models/job");
 const User = require("../models/user");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { get } = require("mongoose");
+const { extractResumeData } = require("../utils/aiService");
+const { successResponse, errorResponse } = require("../utils/responseHandler");
 
-require("dotenv").config();
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-const extractedSkillsWithLLM = async (parsedText) => {
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-
-    const prompt = `
-    Extract key technical and soft skills from the following resume text. 
-    Provide ONLY a JSON response in this format: 
-    { "skills": ["skill1", "skill2", "skill3", ...] }.
-    
-    Resume Text: "${parsedText}"
-  `;
-
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
-
-    // Extract JSON from response
-    const jsonMatch = responseText.match(/\{.*\}/s); // Find JSON block
-    if (!jsonMatch) {
-      throw new Error("Invalid JSON response from Gemini API");
-    }
-
-    return JSON.parse(jsonMatch[0]).skills || [];
-  } catch (error) {
-    console.error("LLM Skill Extraction Error:", error);
-    return [];
-  }
-};
-
-const extractExperienceWithLLM = async (parsedText) => {
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-
-    const prompt = `
-    Extract the years of experience from the resume text. 
-    Provide ONLY a JSON response in this format: 
-    { "experience": number }.
-    
-    Resume Text: "${parsedText}"
-  `;
-
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
-
-    // Extract JSON from response
-    const jsonMatch = responseText.match(/\{.*\}/s);
-    if (!jsonMatch) {
-      throw new Error("Invalid JSON response from Gemini API");
-    }
-
-    const experience = JSON.parse(jsonMatch[0]).experience;
-
-    // Ensure it is always a valid number
-    return typeof experience === "number" && experience >= 0 ? experience : 0;
-  } catch (error) {
-    console.error("LLM Experience Extraction Error:", error);
-    return 0; // Default to 0 if there's an error
-  }
-};
-
-
-const uploadResume = async (req, res) => {
+const uploadResume = async (req, res, next) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
+      return errorResponse(res, "No file uploaded", 400);
     }
 
     const { name, email, jobId } = req.body;
     const userID = req.user.userId;
 
     const user = await User.findById(userID);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    if (!user) return errorResponse(res, "User not found", 404);
 
-    if (!jobId) {
-      return res.status(400).json({ error: "Job ID is required" });
-    }
+    if (!jobId) return errorResponse(res, "Job ID is required", 400);
 
     const job = await Job.findById(jobId);
-    if (!job) {
-      return res.status(404).json({ error: "Job not found" });
-    }
+    if (!job) return errorResponse(res, "Job not found", 404);
 
     // Prevent duplicate applications
     if (!user.appliedJobs.includes(jobId)) {
       user.appliedJobs.push(jobId);
       await user.save();
+    } else {
+      // Optional: Return error if already applied
+      // return errorResponse(res, "You have already applied for this job", 400);
     }
 
     // Extract text from PDF
     const data = await pdfParse(req.file.buffer);
-    const parsedText = data.text.toLowerCase();
+    const parsedText = data.text; // Better to keep original case for LLM
 
-    // Extract skills using Gemini LLM
-    const extractedSkills = await extractedSkillsWithLLM(parsedText);
-    const extractedExperience = await extractExperienceWithLLM(parsedText);
+    // Extract skills and experience using unified AI service
+    const { skills, experience } = await extractResumeData(parsedText);
 
-    // Save Resume
     const newResume = new Resume({
-      name: name || "Unknown",
-      email: email || "No Email",
-      skills: extractedSkills,
-      experience:extractedExperience || 0,
-      parsedText,
+      name: name || user.name || "Unknown",
+      email: email || user.email || "No Email",
+      skills,
+      experience,
+      parsedText: parsedText.toLowerCase(), // Store lowercase for searching if needed
     });
 
     await newResume.save();
 
-    // Add resume to the job's resumes array
     job.resumes.push(newResume._id);
     await job.save();
 
-    res.status(201).json({
-      message: "Resume uploaded successfully and linked to the job",
-      data: newResume,
-    });
+    return successResponse(res, "Resume uploaded successfully and linked to the job", newResume, 201);
   } catch (err) {
-    console.error("Error uploading resume:", err.message, err.stack);
-    res.status(500).json({ error: "Internal Server Error" });
+    next(err);
   }
 };
 
-const updateResume = async (req, res) => {
+const updateResume = async (req, res, next) => {
   try {
     const { status } = req.body;
     const { resumeId } = req.params;
 
-    if (!status) {
-      return res.status(400).json({ error: "Status is required" });
-    }
+    if (!status) return errorResponse(res, "Status is required", 400);
 
     const updatedResume = await Resume.findByIdAndUpdate(
-      resumeId, // Correctly passing resumeId
-      { status }, // Updating only the status field
-      { new: true } // Returns the updated document
+      resumeId,
+      { status },
+      { new: true }
     );
 
-    if (!updatedResume) {
-      return res.status(404).json({ error: "Resume not found" });
-    }
+    if (!updatedResume) return errorResponse(res, "Resume not found", 404);
 
-    res.status(200).json({ message: "Resume updated successfully", data: updatedResume });
+    return successResponse(res, "Resume updated successfully", updatedResume);
   } catch (err) {
-    console.error("Error updating resume:", err);
-    res.status(500).json({ error: "Internal Server Error" });
+    next(err);
   }
 };
 
-
-const getResumesById = async (req, res) => {
+const getResumesById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Find the job by ID
     const resume = await Resume.findById(id);
-    if (!resume) {
-      return res.status(404).json({ error: "Resume not found" });
-    }
-    // Find the job associated with this resume
+    if (!resume) return errorResponse(res, "Resume not found", 404);
+
     const job = await Job.findOne({ resumes: id });
-    if (!job) {
-      return res.status(404).json({ error: "Job not found for this resume" });
-    }
-    // Send the resume and job details
-    res.status(200).json({ resume, job });
+    if (!job) return errorResponse(res, "Job not found for this resume", 404);
+
+    return successResponse(res, "Resume details fetched successfully", { resume, job });
   } catch (err) {
-    console.error("Error fetching resumes:", err);
-    res.status(500).json({ error: "Internal Server Error" });
+    next(err);
   }
-}
- 
-const shortlistedResumes = async (req, res) => {
+};
+
+const shortlistedResumes = async (req, res, next) => {
   try {
     const { adminId } = req.params;
 
-    // Step 1: Find job IDs created by the given admin
     const jobs = await Job.find({ createdBy: adminId }).select("_id resumes");
-
-    // Extract all resume IDs from these jobs
     const resumeIds = jobs.flatMap(job => job.resumes);
 
-    // Step 2: Find only resumes that are shortlisted
-    const shortlistedResumes = await Resume.find({
+    const resumes = await Resume.find({
       _id: { $in: resumeIds },
       status: "shortlisted",
     });
 
-    res.status(200).json({ shortlistedResumes });
+    return successResponse(res, "Shortlisted resumes fetched successfully", resumes);
   } catch (err) {
-    console.error("Error fetching shortlisted resumes:", err);
-    res.status(500).json({ error: "Internal Server Error" });
+    next(err);
   }
 };
 
-
-
-
-module.exports = { uploadResume , shortlistedResumes , updateResume , getResumesById };
+module.exports = { uploadResume, shortlistedResumes, updateResume, getResumesById };

@@ -1,176 +1,158 @@
 import React, { useContext, useState } from "react";
-import { AuthContext } from "../store/AuthCOntext";
+import { AuthContext } from "../store/AuthContext";
 import { useNavigate } from "react-router-dom";
-import {
-  User,
-  Mail,
-  Lock,
-  ChevronDown,
-  Loader2,
-  CheckCircle,
-  AlertCircle,
-} from "lucide-react";
+import { User, Mail, Lock, ChevronDown, Loader2, ArrowLeft, Target, Zap, ShieldCheck, ArrowRight } from "lucide-react";
 
 function Register() {
+  const { register, loading } = useContext(AuthContext);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    type: "user"
+  });
+  
   const navigate = useNavigate();
-  const {
-    AxiosRegister,
-    name,
-    setName,
-    email,
-    setEmail,
-    type,
-    setType,
-    password,
-    setPassword,
-    success,
-    err,
-  } = useContext(AuthContext);
 
-  const [loading, setLoading] = useState(false);
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    AxiosRegister();
-    setLoading(false);
+    await register(formData, navigate);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
-      <div className="bg-white p-8 sm:p-12 rounded-2xl shadow-2xl w-full max-w-md border border-gray-100 backdrop-blur-sm backdrop-filter">
-        {/* Header */}
-        <div className="text-center space-y-2 mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-50 mb-4">
-            <User className="w-8 h-8 text-purple-500" />
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
-          <p className="text-gray-500">Join us and start your journey</p>
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 selection:bg-emerald-500/30 selection:text-emerald-200 overflow-hidden relative">
+      {/* Background Decor */}
+      <div className="absolute top-0 left-0 w-full h-full -z-10 text-emerald-900/10">
+         <div className="absolute top-[-10%] left-[-5%] w-[50%] h-[60%] bg-emerald-600/10 blur-[150px] rounded-full" />
+         <div className="absolute bottom-[-10%] right-[-5%] w-[50%] h-[60%] bg-teal-600/10 blur-[150px] rounded-full" />
+      </div>
+
+      {/* Back button */}
+      <button 
+        onClick={() => navigate("/")}
+        className="fixed top-8 left-8 flex items-center text-slate-500 hover:text-white transition-all group font-black uppercase text-[10px] tracking-widest"
+      >
+        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center mr-3 group-hover:bg-emerald-600/20 group-hover:text-emerald-500 transition-all">
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
         </div>
-        {/* Register Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 block">
-              Full Name
-            </label>
-            <div className="relative">
-              <User className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-              <input
-                type="text"
-                value={name}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
-                placeholder="Enter your full name"
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
+        Back to Hub
+      </button>
+
+      <div className="w-full max-w-[520px] animate-in fade-in slide-in-from-bottom-8 duration-700">
+        <div className="bg-slate-900/50 backdrop-blur-xl rounded-[3.5rem] shadow-2xl shadow-emerald-950/20 p-8 md:p-14 border border-white/5 relative">
+          <div className="absolute top-0 right-0 p-10">
+             <ShieldCheck className="text-emerald-500 opacity-10 w-16 h-16 -rotate-12" />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 block">
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-              <input
-                type="email"
-                value={email}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
-                placeholder="Enter your email"
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+          <div className="text-center mb-10 relative z-10">
+            <div className="w-20 h-20 bg-emerald-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-emerald-900/30 group">
+              <User className="text-white w-10 h-10 group-hover:scale-110 transition-transform" fill="white" />
             </div>
+            <h1 className="text-4xl font-black text-white mb-3 tracking-tighter">Initialize Identity</h1>
+            <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.2em]">Scale your career with AIBatch</p>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 block">
-              Password
-            </label>
-            <div className="relative">
-              <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-              <input
-                type="password"
-                value={password}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
-                placeholder="Create a strong password"
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+            <div className="grid grid-cols-1 gap-6">
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Legal Name</label>
+                <div className="relative group">
+                  <User className="w-5 h-5 text-slate-600 absolute left-5 top-1/2 -translate-y-1/2 group-focus-within:text-emerald-500 transition-colors" />
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="John Wick"
+                    className="w-full pl-14 pr-6 py-4 bg-slate-800/50 border border-white/5 rounded-2xl focus:bg-slate-800 focus:ring-4 focus:ring-emerald-900/30 focus:border-emerald-500 outline-none transition-all placeholder:text-slate-600 font-bold text-white shadow-inner"
+                  />
+                </div>
+              </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 block">
-              Account Type
-            </label>
-            <div className="relative">
-              <ChevronDown className="w-5 h-5 text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
-              <select
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white appearance-none"
-                required
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Network Identity (Email)</label>
+                <div className="relative group">
+                  <Mail className="w-5 h-5 text-slate-600 absolute left-5 top-1/2 -translate-y-1/2 group-focus-within:text-emerald-500 transition-colors" />
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="wick@high-table.io"
+                    className="w-full pl-14 pr-6 py-4 bg-slate-800/50 border border-white/5 rounded-2xl focus:bg-slate-800 focus:ring-4 focus:ring-emerald-900/30 focus:border-emerald-500 outline-none transition-all placeholder:text-slate-600 font-bold text-white shadow-inner"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Security Key (Password)</label>
+                <div className="relative group">
+                  <Lock className="w-5 h-5 text-slate-600 absolute left-5 top-1/2 -translate-y-1/2 group-focus-within:text-emerald-500 transition-colors" />
+                  <input
+                    type="password"
+                    name="password"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••••••"
+                    className="w-full pl-14 pr-6 py-4 bg-slate-800/50 border border-white/5 rounded-2xl focus:bg-slate-800 focus:ring-4 focus:ring-emerald-900/30 focus:border-emerald-500 outline-none transition-all placeholder:text-slate-600 font-bold text-white shadow-inner"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Protocol / Role</label>
+                <div className="relative group">
+                  <Target className="w-5 h-5 text-slate-600 absolute left-5 top-1/2 -translate-y-1/2 group-focus-within:text-emerald-500 transition-colors " />
+                  <ChevronDown className="w-5 h-5 text-slate-600 absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleChange}
+                    className="w-full pl-14 pr-12 py-4 bg-slate-800/50 border border-white/5 rounded-2xl focus:bg-slate-800 focus:ring-4 focus:ring-emerald-900/30 focus:border-emerald-500 outline-none transition-all font-bold text-white appearance-none cursor-pointer"
+                  >
+                    <option value="user">Talent Node (Job Seeker)</option>
+                    <option value="admin">Command Node (Recruiter / Admin)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-emerald-600 text-white py-5 rounded-2xl font-black text-lg shadow-2xl shadow-emerald-900/30 hover:bg-emerald-500 hover:-translate-y-1 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center px-4 uppercase tracking-widest mt-4"
+            >
+              {loading ? (
+                <Loader2 className="w-6 h-6 animate-spin mr-3" />
+              ) : (
+                <>Deploy Identity <ArrowRight className="ml-3 w-5 h-5" /></>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-12 text-center relative z-10">
+            <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">
+              Standardized?{" "}
+              <button
+                onClick={() => navigate("/login")}
+                className="ml-2 text-emerald-500 font-black hover:text-emerald-400 transition-colors underline decoration-2 underline-offset-4"
               >
-                <option value="user">Regular User</option>
-                <option value="admin">Administrator</option>
-              </select>
-            </div>
+                Access Portal
+              </button>
+            </p>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full bg-purple-600 text-white py-3 px-4 rounded-lg transition-all duration-200 shadow-lg flex items-center justify-center space-x-2 font-medium
-              ${
-                loading
-                  ? "opacity-60 cursor-not-allowed"
-                  : "hover:bg-purple-700 hover:shadow-xl transform hover:-translate-y-0.5"
-              }`}
-          >
-            {/* {loading && <Loader2 className="w-5 h-5 animate-spin" />} */}
-            {loading && <Loader2 className="w-5 h-5 animate-spin" />}
-            <span>{loading ? "Creating in..." : "Create Acoount"}</span>
-          </button>
-        </form>
-
-        {/* Messages */}
-        {success && (
-          <div className="mt-4 p-4 rounded-lg bg-green-50 border border-green-200 text-green-700 flex items-center">
-            <CheckCircle className="w-5 h-5 mr-2" />
-            {success}
-          </div>
-        )}
-        {err && (
-          <div className="mt-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-center">
-            <AlertCircle className="w-5 h-5 mr-2" />
-            {err}
-          </div>
-        )}
-
-        {/* Already Have an Account */}
-        <div className="mt-8 text-center">
-          <span className="text-gray-500">Already have an account?</span>
-          <button
-            onClick={() => navigate("/login")}
-            className="ml-2 text-purple-600 font-medium hover:text-purple-800 transition-colors"
-          >
-            Sign in
-          </button>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-gray-100">
-          <p className="text-xs text-center text-gray-500">
-            By creating an account, you agree to our{" "}
-            <a href="#" className="text-purple-600 hover:text-purple-800">
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href="#" className="text-purple-600 hover:text-purple-800">
-              Privacy Policy
-            </a>
-          </p>
-        </div>
+        <p className="mt-10 text-center text-slate-600 text-[10px] font-black uppercase tracking-[0.3em] px-12 leading-relaxed">
+          By deploying, you agree to our Protocol Terms and Data Privacy Standards.
+        </p>
       </div>
     </div>
   );
