@@ -12,7 +12,8 @@ import {
   ChevronRight,
   Info,
   X,
-  FileText
+  FileText,
+  Loader2
 } from "lucide-react";
 import { JobContext } from "../store/JobContext";
 

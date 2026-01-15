@@ -8,7 +8,8 @@ const {
   rankResumesForJob,
   processCandidate,
   getAllJobsByAdmin,
-  getAllResumesByAdmin
+  getAllResumesByAdmin,
+  rankSingleResume
 } = require("../controllers/jobController");
 const { authenticateJWT } = require("../middleware/auth");
 
@@ -25,6 +26,7 @@ router.delete("/:jobId",authenticateJWT, deleteJob);
 
 // Resume Ranking
 router.get("/:jobId/rank-resumes", rankResumesForJob);
+router.get("/:jobId/rank-resume/:resumeId", rankSingleResume);
 router.post("/process", processCandidate); // Shortlist or reject candidates
 
 

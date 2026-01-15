@@ -6,13 +6,13 @@ import Header from "../components/Header";
 function AdminLayout() {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [user , setUsser ] = useState("")
+  const [user, setUser] = useState("");
 
   useEffect(() => {
     const fetchedUser = () => {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
-        setUsser(JSON.parse(storedUser));
+        setUser(JSON.parse(storedUser));
         console.log(storedUser);
       }
     };

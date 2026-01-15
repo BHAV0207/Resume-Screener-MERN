@@ -141,7 +141,7 @@ const processCandidate = async (req, res, next) => {
 
     if (!job || !resume) return errorResponse(res, "Job or Resume not found", 404);
 
-    const isShortlisted = action === "shortlist";
+    const isShortlisted = action === "shortlisted" || action === "shortlist";
     const subject = isShortlisted
       ? `🎉 Congratulations! You are shortlisted for ${job.title}`
       : `❌ Application Update - ${job.title}`;
@@ -171,11 +171,13 @@ const rankResumesForJob = async (req, res, next) => {
     const resumes = job.resumes;
     if (!resumes.length) return errorResponse(res, "No resumes found for this job", 404);
 
-    const rankedResumes = resumes.map((resume) => {
+    const rankedResumes = await Promise.all(resumes.map(async (resume) => {
       let skillMatches = 0;
       let experienceScore = 0;
 
       if (!Array.isArray(resume.skills) || resume.skills.length === 0) {
+        resume.jobMatchScore = 0;
+        await resume.save();
         return { resume, skillMatches, experienceScore, finalScore: 0 };
       }
 
@@ -189,20 +191,66 @@ const rankResumesForJob = async (req, res, next) => {
       if (job.minExperience > 0) {
         experienceScore = Math.min(resume.experience / job.minExperience, 1) * 10;
       } else {
-        experienceScore = 10; // If no min experience required, everyone gets full score for this part
+        experienceScore = 10;
       }
 
       const skillScore = job.requiredSkills.length > 0
         ? (skillMatches / job.requiredSkills.length) * 70
         : 0;
 
-      const finalScore = skillScore + experienceScore * 3; // experienceScore is max 10, so *3 = 30 max. Total 100.
-      return { resume, skillMatches, experienceScore, finalScore: Math.round(finalScore) };
-    });
+      const finalScore = Math.round(skillScore + experienceScore * 3);
+      
+      resume.jobMatchScore = finalScore;
+      await resume.save();
+
+      return { resume, skillMatches, experienceScore, finalScore };
+    }));
 
     rankedResumes.sort((a, b) => b.finalScore - a.finalScore);
 
     return successResponse(res, "Resumes ranked successfully", { job, rankedResumes });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const rankSingleResume = async (req, res, next) => {
+  console.log(req.params)
+  try {
+    const { jobId, resumeId } = req.params;
+    const job = await Job.findById(jobId);
+    const resume = await Resume.findById(resumeId);
+
+    if (!job || !resume) return errorResponse(res, "Job or Resume not found", 404);
+
+    let skillMatches = 0;
+    let experienceScore = 0;
+
+    if (Array.isArray(resume.skills) && resume.skills.length > 0) {
+      job.requiredSkills.forEach((jobSkill) => {
+        const match = stringSimilarity.findBestMatch(jobSkill, resume.skills);
+        if (match.bestMatch.rating > 0.7) {
+          skillMatches++;
+        }
+      });
+    }
+
+    if (job.minExperience > 0) {
+      experienceScore = Math.min(resume.experience / job.minExperience, 1) * 10;
+    } else {
+      experienceScore = 10;
+    }
+
+    const skillScore = job.requiredSkills.length > 0
+      ? (skillMatches / job.requiredSkills.length) * 70
+      : 0;
+
+    const finalScore = Math.round(skillScore + experienceScore * 3);
+    
+    resume.jobMatchScore = finalScore;
+    await resume.save();
+
+    return successResponse(res, "Resume ranked successfully", { resume, finalScore });
   } catch (error) {
     next(error);
   }
@@ -215,6 +263,7 @@ module.exports = {
   updateJob,
   deleteJob,
   rankResumesForJob,
+  rankSingleResume,
   processCandidate,
   getAllJobsByAdmin,
   getAllResumesByAdmin

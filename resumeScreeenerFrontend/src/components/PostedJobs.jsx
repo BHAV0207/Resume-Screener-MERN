@@ -12,6 +12,7 @@ import {
   Users,
   ExternalLink,
   Target,
+  ChevronDown,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { JobContext } from "../store/JobContext";
@@ -128,13 +129,18 @@ const PostedJobs = () => {
                     </div>
                   </td>
                   <td className="px-10 py-7 text-center">
+
+{/* AVC SIDVB */}
                     <button 
                       onClick={() => navigate(`/admin/posted-jobs/${job._id}`)}
                       className="inline-flex items-center px-5 py-2.5 bg-emerald-50 text-emerald-700 rounded-xl font-black text-xs hover:bg-emerald-100 transition-all border border-emerald-100 shadow-sm uppercase tracking-widest"
                     >
                       <Users className="w-4 h-4 mr-2" />
-                      {job.resumes?.length || 0} Unit
+                      {job.resumes?.length || 0} Resumes
                     </button>
+
+
+
                   </td>
                   <td className="px-10 py-7">
                     <span className={`inline-flex items-center px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${

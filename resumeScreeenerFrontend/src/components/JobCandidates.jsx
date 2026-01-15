@@ -13,13 +13,14 @@ import {
   CheckCircle2, 
   XCircle,
   Loader2,
-  FileText
+
+  Target
 } from 'lucide-react';
 
 function JobCandidates() {
   const { id: jobId } = useParams();
   const navigate = useNavigate();
-  const { getJobById, job, rankResumes, processCandidate, loading } = useContext(JobContext);
+  const { getJobById, currentJob: job, rankResumes, rankSingleResume, processCandidate, loading } = useContext(JobContext);
   const [candidates, setCandidates] = useState([]);
   const [rankingInProgress, setRankingInProgress] = useState(false);
 
@@ -28,6 +29,24 @@ function JobCandidates() {
       getJobById(jobId);
     }
   }, [jobId, getJobById]);
+
+  useEffect(() => {
+    if (job?.resumes) {
+      setCandidates(job.resumes.map(r => ({
+        ...r,
+        matchScore: r.jobMatchScore || 0
+      })));
+    }
+  }, [job]);
+
+  const handleRankSingleResume = async (resumeId) => {
+    const score = await rankSingleResume(jobId, resumeId);
+    if (score !== undefined) {
+      setCandidates(prev => prev.map(c => 
+        c._id === resumeId ? { ...c, matchScore: score } : c
+      ));
+    }
+  };
 
   const handleRankResumes = async () => {
     setRankingInProgress(true);
@@ -166,8 +185,13 @@ function JobCandidates() {
                    </div>
                 </div>
 
-                {/* Status Actions */}
                 <div className="flex md:flex-row xl:flex-col gap-4">
+                  <button 
+                    onClick={() => handleRankSingleResume(candidate._id)}
+                    className="flex-1 xl:w-48 flex items-center justify-center px-6 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-black transition-all shadow-xl shadow-slate-900/10 active:scale-95"
+                  >
+                    <BrainCircuit className="w-4 h-4 mr-2" /> Analyse Node
+                  </button>
                   <button 
                     disabled={candidate.status === 'shortlisted'}
                     onClick={() => handleProcessCandidate(candidate._id, 'shortlisted')}

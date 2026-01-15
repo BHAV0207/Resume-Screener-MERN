@@ -11,11 +11,13 @@ import {
   ChevronRight,
   Target
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { JobContext } from "../store/JobContext";
 import toast from "react-hot-toast";
 
 const ActiveJobs = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
   const { activeJobs, fetchAdminJobStats } = useContext(JobContext);
 
   useEffect(() => {
@@ -126,7 +128,10 @@ const ActiveJobs = () => {
                     >
                       <Share2 size={20} />
                     </button>
-                    <button className="flex items-center px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-100 group-hover:translate-x-1">
+                    <button 
+                      onClick={() => navigate(`/admin/active-jobs/${job._id}`)}
+                      className="flex items-center px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-100 group-hover:translate-x-1"
+                    >
                        Access Hub <ChevronRight size={18} className="ml-2" />
                     </button>
                  </div>

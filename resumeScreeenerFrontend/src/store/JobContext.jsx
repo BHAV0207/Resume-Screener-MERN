@@ -13,6 +13,8 @@ export const JobProvider = ({ children }) => {
   const [allJobs, setAllJobs] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  console.log(resumes)
+
   const fetchAdminJobStats = useCallback(async () => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user?.id) return;
@@ -37,7 +39,9 @@ export const JobProvider = ({ children }) => {
 
     setLoading(true);
     try {
+      console.log(user.id)
       const res = await axiosInstance.get(`/jobs/${user.id}/resumes`);
+      console.log(res)
       setResumes(res.data.data.resumes || []);
     } catch (err) {
       console.error("Error fetching admin resumes:", err);
@@ -58,7 +62,7 @@ export const JobProvider = ({ children }) => {
     }
   }, []);
 
-  const getJobById = async (jobId) => {
+  const getJobById = useCallback(async (jobId) => {
     setLoading(true);
     try {
       const res = await axiosInstance.get(`/jobs/job/${jobId}`);
@@ -69,9 +73,9 @@ export const JobProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const getAllJobs = async () => {
+  const getAllJobs = useCallback(async () => {
     setLoading(true);
     try {
       const res = await axiosInstance.get("/jobs");
@@ -81,9 +85,9 @@ export const JobProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const createJob = async (jobData) => {
+  const createJob = useCallback(async (jobData) => {
     setLoading(true);
     try {
       await axiosInstance.post("/jobs/create", jobData);
@@ -94,9 +98,9 @@ export const JobProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchAdminJobStats]);
 
-  const deleteJob = async (jobId) => {
+  const deleteJob = useCallback(async (jobId) => {
     if (!window.confirm("Are you sure you want to delete this job?")) return;
     try {
       await axiosInstance.delete(`/jobs/${jobId}`);
@@ -105,9 +109,9 @@ export const JobProvider = ({ children }) => {
     } catch (err) {
       toast.error("Error deleting job");
     }
-  };
+  }, [fetchAdminJobStats]);
 
-  const updateJob = async (jobId, updatedData) => {
+  const updateJob = useCallback(async (jobId, updatedData) => {
     try {
       await axiosInstance.put(`/jobs/${jobId}`, updatedData);
       toast.success("Job updated successfully");
@@ -115,9 +119,9 @@ export const JobProvider = ({ children }) => {
     } catch (err) {
       toast.error("Error updating job");
     }
-  };
+  }, [fetchAdminJobStats]);
 
-  const applyForJob = async (file, jobId) => {
+  const applyForJob = useCallback(async (file, jobId) => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user?.id) return;
 
@@ -138,9 +142,34 @@ export const JobProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const processCandidate = async (jobId, resumeId, action) => {
+  const rankResumes = useCallback(async (jobId) => {
+    setLoading(true);
+    try {
+      const res = await axiosInstance.get(`/jobs/${jobId}/rank-resumes`);
+      return res.data.data.rankedResumes.map(item => ({
+        ...item.resume,
+        matchScore: item.finalScore
+      }));
+    } catch (err) {
+      toast.error("Error ranking resumes");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const rankSingleResume = useCallback(async (jobId, resumeId) => {
+    try {
+      console.log(jobId, resumeId)
+      const res = await axiosInstance.get(`/jobs/${jobId}/rank-resume/${resumeId}`);
+      return res.data.data.finalScore;
+    } catch (err) {
+      toast.error("Error ranking resume");
+    }
+  }, []);
+
+  const processCandidate = useCallback(async (jobId, resumeId, action) => {
     try {
       await axiosInstance.post("/jobs/process", { jobId, resumeId, action });
       toast.success(`Candidate ${action}ed successfully`);
@@ -148,7 +177,7 @@ export const JobProvider = ({ children }) => {
     } catch (err) {
       toast.error(`Error ${action}ing candidate`);
     }
-  };
+  }, [getJobById]);
 
   return (
     <JobContext.Provider
@@ -170,6 +199,8 @@ export const JobProvider = ({ children }) => {
         updateJob,
         applyForJob,
         processCandidate,
+        rankResumes,
+        rankSingleResume,
       }}
     >
       {children}

@@ -39,8 +39,8 @@ function App() {
           <Route path="posted-jobs" element={<PostedJobs />} />
           <Route path="all-resumes" element={<AllResumes />} />
           <Route path="active-jobs" element={<ActiveJobs />} />
-          <Route path="posted-jobs/:jobId"  element={<JobCandidates />} />
-          <Route path="active-jobs/:jobId"  element={<JobCandidates />} />
+          <Route path="posted-jobs/:id"  element={<JobCandidates />} />
+          <Route path="active-jobs/:id"  element={<JobCandidates />} />
           <Route path="profile" element={<Profile />} />
 
         </Route>

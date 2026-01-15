@@ -12,20 +12,22 @@ import {
   Star,
   CheckCircle,
   XCircle,
-  Briefcase
+  Briefcase,
+  Zap
 } from "lucide-react";
 import { JobContext } from "../store/JobContext";
 
 const AllResumes = () => {
-  const { allResume, fetchAdminResumes, loading } = useContext(JobContext);
+  const { resumes, fetchAdminResumes, loading } = useContext(JobContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedResume, setSelectedResume] = useState(null);
 
   useEffect(() => {
+    console.log("useEffect");
     fetchAdminResumes();
   }, [fetchAdminResumes]);
-
+ console.log(resumes);
   const getStatusStyle = (status) => {
     switch(status) {
       case "shortlisted": return "bg-emerald-50 text-emerald-700 border-emerald-100";
@@ -34,7 +36,7 @@ const AllResumes = () => {
     }
   };
 
-  const filteredResumes = allResume?.filter((resume) => {
+  const filteredResumes = resumes?.filter((resume) => {
     const matchesSearch =
       resume.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       resume.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -215,6 +217,7 @@ const AllResumes = () => {
                       <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl shadow-slate-200 relative overflow-hidden group">
                          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-all">
                             <Zap size={64} fill="white" />
+
                          </div>
                          <h3 className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] mb-4">Maturity Level</h3>
                          <div className="text-5xl font-black tracking-tighter">{selectedResume.experience || 0} <span className="text-xl text-slate-400">YRS</span></div>
