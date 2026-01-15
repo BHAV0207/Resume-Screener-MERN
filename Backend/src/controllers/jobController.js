@@ -4,6 +4,7 @@ const stringSimilarity = require("string-similarity");
 const User = require("../models/user");
 const sendEmail = require("../utils/emailService");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
+const calculateResumeScore = require("../utils/resumeScoring");
 
 // 1️⃣ Create a new job posting
 const createJob = async (req, res, next) => {
@@ -161,100 +162,82 @@ const processCandidate = async (req, res, next) => {
   }
 };
 
+
 const rankResumesForJob = async (req, res, next) => {
   try {
     const jobId = req.params.jobId;
     const job = await Job.findById(jobId).populate("resumes");
 
-    if (!job) return errorResponse(res, "Job not found", 404);
+    if (!job) {
+      return errorResponse(res, "Job not found", 404);
+    }
 
-    const resumes = job.resumes;
-    if (!resumes.length) return errorResponse(res, "No resumes found for this job", 404);
+    if (!job.resumes || job.resumes.length === 0) {
+      return errorResponse(res, "No resumes found for this job", 404);
+    }
 
-    const rankedResumes = await Promise.all(resumes.map(async (resume) => {
-      let skillMatches = 0;
-      let experienceScore = 0;
+    const rankedResumes = await Promise.all(
+      job.resumes.map(async (resume) => {
+        const {
+          finalScore,
+          skillMatches,
+          experienceScore,
+        } = calculateResumeScore(job, resume);
 
-      if (!Array.isArray(resume.skills) || resume.skills.length === 0) {
-        resume.jobMatchScore = 0;
+        resume.jobMatchScore = finalScore;
         await resume.save();
-        return { resume, skillMatches, experienceScore, finalScore: 0 };
-      }
 
-      job.requiredSkills.forEach((jobSkill) => {
-        const match = stringSimilarity.findBestMatch(jobSkill, resume.skills);
-        if (match.bestMatch.rating > 0.7) {
-          skillMatches++;
-        }
-      });
-
-      if (job.minExperience > 0) {
-        experienceScore = Math.min(resume.experience / job.minExperience, 1) * 10;
-      } else {
-        experienceScore = 10;
-      }
-
-      const skillScore = job.requiredSkills.length > 0
-        ? (skillMatches / job.requiredSkills.length) * 70
-        : 0;
-
-      const finalScore = Math.round(skillScore + experienceScore * 3);
-      
-      resume.jobMatchScore = finalScore;
-      await resume.save();
-
-      return { resume, skillMatches, experienceScore, finalScore };
-    }));
+        return {
+          resume,
+          finalScore,
+          skillMatches,
+          experienceScore,
+        };
+      })
+    );
 
     rankedResumes.sort((a, b) => b.finalScore - a.finalScore);
 
-    return successResponse(res, "Resumes ranked successfully", { job, rankedResumes });
+    return successResponse(res, "Resumes ranked successfully", {
+      job,
+      rankedResumes,
+    });
   } catch (error) {
     next(error);
   }
 };
 
 const rankSingleResume = async (req, res, next) => {
-  console.log(req.params)
   try {
     const { jobId, resumeId } = req.params;
+
     const job = await Job.findById(jobId);
     const resume = await Resume.findById(resumeId);
 
-    if (!job || !resume) return errorResponse(res, "Job or Resume not found", 404);
-
-    let skillMatches = 0;
-    let experienceScore = 0;
-
-    if (Array.isArray(resume.skills) && resume.skills.length > 0) {
-      job.requiredSkills.forEach((jobSkill) => {
-        const match = stringSimilarity.findBestMatch(jobSkill, resume.skills);
-        if (match.bestMatch.rating > 0.7) {
-          skillMatches++;
-        }
-      });
+    if (!job || !resume) {
+      return errorResponse(res, "Job or Resume not found", 404);
     }
 
-    if (job.minExperience > 0) {
-      experienceScore = Math.min(resume.experience / job.minExperience, 1) * 10;
-    } else {
-      experienceScore = 10;
-    }
+    const {
+      finalScore,
+      skillMatches,
+      experienceScore,
+    } = calculateResumeScore(job, resume);
 
-    const skillScore = job.requiredSkills.length > 0
-      ? (skillMatches / job.requiredSkills.length) * 70
-      : 0;
-
-    const finalScore = Math.round(skillScore + experienceScore * 3);
-    
     resume.jobMatchScore = finalScore;
     await resume.save();
 
-    return successResponse(res, "Resume ranked successfully", { resume, finalScore });
+    return successResponse(res, "Resume ranked successfully", {
+      resume,
+      finalScore,
+      skillMatches,
+      experienceScore,
+    });
   } catch (error) {
     next(error);
   }
 };
+
 
 module.exports = {
   createJob,

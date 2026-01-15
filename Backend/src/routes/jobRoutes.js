@@ -18,8 +18,6 @@ const router = express.Router();
 // Job CRUD Operations
 router.post("/create", authenticateJWT, createJob);         
 router.get("/", getAllJobs);  
-router.get("/:createdBy", authenticateJWT , getAllJobsByAdmin)  
-router.get("/:createdBy/resumes", authenticateJWT , getAllResumesByAdmin)  
 router.get("/job/:jobId", getJobById);         
 router.put("/:jobId",authenticateJWT, updateJob);
 router.delete("/:jobId",authenticateJWT, deleteJob);  
@@ -29,5 +27,7 @@ router.get("/:jobId/rank-resumes", rankResumesForJob);
 router.get("/:jobId/rank-resume/:resumeId", rankSingleResume);
 router.post("/process", processCandidate); // Shortlist or reject candidates
 
+router.get("/:createdBy/resumes", authenticateJWT , getAllResumesByAdmin)  
+router.get("/:createdBy", authenticateJWT , getAllJobsByAdmin)  
 
 module.exports = router;
