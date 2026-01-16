@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./src/config/db");
+const { connectProducer } = require("./src/kafka/producer");
 
 const app = express();
 
@@ -25,6 +26,7 @@ const errorHandler = require("./src/middleware/errorHandler");
 
 // Connect to Database
 connectDB();
+connectProducer();
 
 // Routes
 app.use("/api/resumes", require("./src/routes/resumeRoutes"));

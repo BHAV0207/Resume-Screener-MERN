@@ -2,6 +2,8 @@ const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
+const { sendMessage } = require("../kafka/producer");
+const { TOPICS } = require("../kafka/topics");
 
 const register = async (req, res, next) => {
   try {
@@ -27,6 +29,15 @@ const register = async (req, res, next) => {
     });
 
     await newUser.save();
+
+    sendMessage(TOPICS.USER_REGISTERED, {
+      userId: newUser.id,
+      email: email,
+      name: name,
+      type: type,
+    }).catch((err) => {
+      console.error("Kafka produce failed", err);
+    });
 
     return successResponse(res, "User registered successfully", {}, 201);
   } catch (err) {

@@ -2,6 +2,9 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./src/config/db");
+const { connectProducer } = require("./src/kafka/producer");
+const { connectConsumer } = require("./src/kafka/consumer");
+const { TOPICS } = require("./src/kafka/topics");
 
 const app = express();
 
@@ -23,6 +26,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Connect to Database
 connectDB();
+connectProducer();
+
+// Initialize Consumer
+connectConsumer(TOPICS.USER_REGISTERED, async (data) => {
+  console.log("📨 Received notification data:", data);
+  // Add notification logic here (e.g. sending email)
+});
 
 // Basic Route
 app.get("/", (req, res) => {
