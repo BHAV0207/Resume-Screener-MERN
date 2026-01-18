@@ -18,7 +18,7 @@ app.use(
       "https://cozy-horse-11712e.netlify.app",
     ],
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json());
@@ -28,11 +28,17 @@ app.use(express.urlencoded({ extended: true }));
 connectDB();
 connectProducer();
 
-// Initialize Consumer
-connectConsumer(TOPICS.USER_REGISTERED, async (data) => {
-  console.log("📨 Received notification data:", data);
-  // Add notification logic here (e.g. sending email)
+
+connectConsumer({
+  [TOPICS.USER_REGISTERED]: async (data) => {
+    console.log("📨 User registered:", data);
+  },
+
+  [TOPICS.RESUME_STATUS]: async (data) => {
+    console.log("📨 Resume status update:", data);
+  },
 });
+
 
 // Basic Route
 app.get("/", (req, res) => {

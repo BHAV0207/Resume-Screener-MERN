@@ -1,13 +1,8 @@
 import { 
   Briefcase, 
-  CheckCircle, 
-  Clock, 
-  XCircle, 
   TrendingUp, 
-  Search,
   ArrowRight,
   Bell,
-  Star,
   Zap,
   Building,
   BrainCircuit

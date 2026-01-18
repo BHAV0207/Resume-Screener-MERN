@@ -23,14 +23,19 @@ const connectProducer = async (retries = 5) => {
 };
 
 const sendMessage = async (topic, message) => {
-  await producer.send({
-    topic,
-    messages: [
-      {
-        value: JSON.stringify(message),
-      },
-    ],
-  });
+  try {
+    await producer.send({
+      topic,
+      messages: [
+        {
+          value: JSON.stringify(message),
+        },
+      ],
+    });
+    console.log(`✅ Kafka Message sent to topic ${topic}`);
+  } catch (error) {
+    console.error(`❌ Failed to send Kafka message to topic ${topic}:`, error);
+  }
 };
 
 module.exports = {

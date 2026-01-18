@@ -4,22 +4,32 @@ const consumer = kafka.consumer({
   groupId: "notification-service-group",
 });
 
-const connectConsumer = async (topic, onMessage) => {
+const handlers = {};
+
+const connectConsumer = async (topicsWithHandlers) => {
   try {
     await consumer.connect();
-    await consumer.subscribe({ topic, fromBeginning: false });
 
-    console.log(`✅ Subscribed to ${topic}`);
+    for (const topic of Object.keys(topicsWithHandlers)) {
+      handlers[topic] = topicsWithHandlers[topic];
+      await consumer.subscribe({ topic, fromBeginning: false });
+      console.log(`✅ Subscribed to ${topic}`);
+    }
 
     await consumer.run({
-      eachMessage: async ({ message }) => {
+      eachMessage: async ({ topic, message }) => {
         if (!message.value) return;
 
         try {
           const data = JSON.parse(message.value.toString());
-          await onMessage(data);
+
+          if (handlers[topic]) {
+            await handlers[topic](data);
+          } else {
+            console.warn(`⚠️ No handler for topic: ${topic}`);
+          }
         } catch (error) {
-          console.error("❌ Error parsing Kafka message:", error);
+          console.error("❌ Error processing Kafka message:", error);
         }
       },
     });

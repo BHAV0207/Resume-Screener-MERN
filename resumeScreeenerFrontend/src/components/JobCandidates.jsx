@@ -1,10 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { JobContext } from '../store/JobContext';
 import { 
   ArrowLeft, 
   Users, 
-  Star, 
   MapPin, 
   DollarSign, 
   Briefcase, 

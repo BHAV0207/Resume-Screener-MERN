@@ -5,6 +5,8 @@ const User = require("../models/user");
 const sendEmail = require("../utils/emailService");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
 const calculateResumeScore = require("../utils/resumeScoring");
+const { sendMessage } = require("../kafka/producer");
+const { TOPICS } = require("../kafka/topics");
 
 // 1️⃣ Create a new job posting
 const createJob = async (req, res, next) => {
@@ -140,6 +142,8 @@ const processCandidate = async (req, res, next) => {
     const job = await Job.findById(jobId);
     const resume = await Resume.findById(resumeId);
 
+    console.log(`data has been received: jobId=${jobId}, resumeId=${resumeId}`);
+
     if (!job || !resume) return errorResponse(res, "Job or Resume not found", 404);
 
     const isShortlisted = action === "shortlisted" || action === "shortlist";
@@ -151,10 +155,24 @@ const processCandidate = async (req, res, next) => {
       ? `Dear ${resume.name},\n\nCongratulations! You have been shortlisted for ${job.title}.\n\nWe will reach out soon for further steps.`
       : `Dear ${resume.name},\n\nThank you for applying for ${job.title}. Unfortunately, we have decided to move forward with other candidates at this time.`;
 
-    await sendEmail(resume.email, subject, message);
-    
+    // await sendEmail(resume.email, subject, message);
+
     resume.status = isShortlisted ? "shortlisted" : "rejected";
     await resume.save();
+
+    console.log(`Resume status updated to: ${resume.status}`);
+
+    await sendMessage(TOPICS.RESUME_STATUS, {
+      recepientId: resume.userId,
+      actorId: req.user._id,
+      jobId: jobId,
+      resumeId: resumeId,
+      status: resume.status,
+      email: resume.email,
+      subject: subject,
+      message: message
+    })
+    console.log("Kafka message sent successfully from controller");
 
     return successResponse(res, `Candidate ${action}ed successfully`);
   } catch (error) {
@@ -206,6 +224,8 @@ const rankResumesForJob = async (req, res, next) => {
     next(error);
   }
 };
+
+
 
 const rankSingleResume = async (req, res, next) => {
   try {
