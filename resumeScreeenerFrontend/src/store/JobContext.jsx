@@ -163,6 +163,7 @@ export const JobProvider = ({ children }) => {
     try {
       console.log(jobId, resumeId)
       const res = await axiosInstance.get(`/jobs/${jobId}/rank-resume/${resumeId}`);
+      console.log(res.data);
       return res.data.data.finalScore;
     } catch (err) {
       toast.error("Error ranking resume");

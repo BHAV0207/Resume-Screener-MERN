@@ -11,11 +11,23 @@ const { TOPICS } = require("../kafka/topics");
 // 1️⃣ Create a new job posting
 const createJob = async (req, res, next) => {
   try {
-    const { title, description, requiredSkills, minExperience, company, location, salary } = req.body;
+    const {
+      title,
+      description,
+      requiredSkills,
+      minExperience,
+      company,
+      location,
+      salary,
+    } = req.body;
     const adminId = req.user.userId;
 
     if (!title || !requiredSkills || requiredSkills.length === 0) {
-      return errorResponse(res, "Title and at least one required skill are required.", 400);
+      return errorResponse(
+        res,
+        "Title and at least one required skill are required.",
+        400,
+      );
     }
 
     const lowercaseSkills = requiredSkills.map((skill) => skill.toLowerCase());
@@ -28,7 +40,7 @@ const createJob = async (req, res, next) => {
       createdBy: adminId,
       company,
       location,
-      salary
+      salary,
     });
 
     await job.save();
@@ -64,13 +76,19 @@ const getAllResumesByAdmin = async (req, res, next) => {
     const jobs = await Job.find({ createdBy }).select("resumes").lean();
 
     if (!jobs.length) {
-      return successResponse(res, "No jobs found for this Admin", { totalResumes: 0, resumes: [] });
+      return successResponse(res, "No jobs found for this Admin", {
+        totalResumes: 0,
+        resumes: [],
+      });
     }
 
-    const allResumeIds = jobs.flatMap(job => job.resumes);
+    const allResumeIds = jobs.flatMap((job) => job.resumes);
     const resumes = await Resume.find({ _id: { $in: allResumeIds } });
 
-    return successResponse(res, "Resumes fetched successfully", { totalResumes: resumes.length, resumes });
+    return successResponse(res, "Resumes fetched successfully", {
+      totalResumes: resumes.length,
+      resumes,
+    });
   } catch (error) {
     next(error);
   }
@@ -99,7 +117,8 @@ const getJobById = async (req, res, next) => {
 
 const updateJob = async (req, res, next) => {
   try {
-    const { title, description, requiredSkills, minExperience, active } = req.body;
+    const { title, description, requiredSkills, minExperience, active } =
+      req.body;
     const job = await Job.findById(req.params.jobId);
 
     if (!job) return errorResponse(res, "Job not found", 404);
@@ -109,7 +128,8 @@ const updateJob = async (req, res, next) => {
     job.requiredSkills = requiredSkills
       ? requiredSkills.map((skill) => skill.toLowerCase())
       : job.requiredSkills;
-    job.minExperience = minExperience !== undefined ? minExperience : job.minExperience;
+    job.minExperience =
+      minExperience !== undefined ? minExperience : job.minExperience;
     if (active !== undefined) job.active = active;
 
     await job.save();
@@ -126,7 +146,7 @@ const deleteJob = async (req, res, next) => {
 
     await User.updateMany(
       { appliedJobs: job._id },
-      { $pull: { appliedJobs: job._id } }
+      { $pull: { appliedJobs: job._id } },
     );
 
     await job.deleteOne();
@@ -142,9 +162,12 @@ const processCandidate = async (req, res, next) => {
     const job = await Job.findById(jobId);
     const resume = await Resume.findById(resumeId);
 
-    console.log(`data has been received: jobId=${jobId}, resumeId=${resumeId}`);
+    console.log(
+      `data has been received: jobId=${jobId}, resumeId=${resumeId} , data=${resume.data}`,
+    );
 
-    if (!job || !resume) return errorResponse(res, "Job or Resume not found", 404);
+    if (!job || !resume)
+      return errorResponse(res, "Job or Resume not found", 404);
 
     const isShortlisted = action === "shortlisted" || action === "shortlist";
     const subject = isShortlisted
@@ -164,14 +187,13 @@ const processCandidate = async (req, res, next) => {
 
     await sendMessage(TOPICS.RESUME_STATUS, {
       recepientId: resume.userId,
-      actorId: req.user._id,
       jobId: jobId,
       resumeId: resumeId,
       status: resume.status,
       email: resume.email,
       subject: subject,
-      message: message
-    })
+      message: message,
+    });
     console.log("Kafka message sent successfully from controller");
 
     return successResponse(res, `Candidate ${action}ed successfully`);
@@ -179,7 +201,6 @@ const processCandidate = async (req, res, next) => {
     next(error);
   }
 };
-
 
 const rankResumesForJob = async (req, res, next) => {
   try {
@@ -196,11 +217,8 @@ const rankResumesForJob = async (req, res, next) => {
 
     const rankedResumes = await Promise.all(
       job.resumes.map(async (resume) => {
-        const {
-          finalScore,
-          skillMatches,
-          experienceScore,
-        } = calculateResumeScore(job, resume);
+        const { finalScore, skillMatches, experienceScore } =
+          calculateResumeScore(job, resume);
 
         resume.jobMatchScore = finalScore;
         await resume.save();
@@ -211,10 +229,16 @@ const rankResumesForJob = async (req, res, next) => {
           skillMatches,
           experienceScore,
         };
-      })
+      }),
     );
 
     rankedResumes.sort((a, b) => b.finalScore - a.finalScore);
+
+     await sendMessage(TOPICS.AI_ANALYSIS_BATCH, {
+          adminId: job.createdBy,
+          Subject: `AI analysis of resumes has been completed for the job ${job.title} at ${job.company}`,
+          content: `heighest score is achieved by ${rankedResumes[0].name} , score achieved is ${rankedResumes[0].jobMatchScore}`,
+        });
 
     return successResponse(res, "Resumes ranked successfully", {
       job,
@@ -224,8 +248,6 @@ const rankResumesForJob = async (req, res, next) => {
     next(error);
   }
 };
-
-
 
 const rankSingleResume = async (req, res, next) => {
   try {
@@ -237,15 +259,21 @@ const rankSingleResume = async (req, res, next) => {
     if (!job || !resume) {
       return errorResponse(res, "Job or Resume not found", 404);
     }
-
-    const {
-      finalScore,
-      skillMatches,
-      experienceScore,
-    } = calculateResumeScore(job, resume);
-
+    const { finalScore, skillMatches, experienceScore } = calculateResumeScore(
+      job,
+      resume,
+    );
+    console.log(resume);
     resume.jobMatchScore = finalScore;
     await resume.save();
+
+    await sendMessage(TOPICS.AI_ANALYSIS, {
+      adminId: job.createdBy,
+      applicantId: resume.userId,
+      applicantEmail: resume.email,
+      Subject: `AI analysis of ${resume.name} has been completed for the job ${job.title} at ${job.company}`,
+      content: `score achieved is ${finalScore}`,
+    });
 
     return successResponse(res, "Resume ranked successfully", {
       resume,
@@ -258,7 +286,6 @@ const rankSingleResume = async (req, res, next) => {
   }
 };
 
-
 module.exports = {
   createJob,
   getAllJobs,
@@ -269,5 +296,5 @@ module.exports = {
   rankSingleResume,
   processCandidate,
   getAllJobsByAdmin,
-  getAllResumesByAdmin
+  getAllResumesByAdmin,
 };

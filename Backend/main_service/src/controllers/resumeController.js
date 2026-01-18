@@ -35,10 +35,13 @@ const uploadResume = async (req, res, next) => {
     const data = await pdfParse(req.file.buffer);
     const parsedText = data.text; // Better to keep original case for LLM
 
+    console.log(`[Resume Controller] Extracted text size: ${parsedText.length}`);
+
     // Extract skills and experience using unified AI service
     const { skills, experience } = await extractResumeData(parsedText);
 
     const newResume = new Resume({
+      userId: userID,
       name: name || user.name || "Unknown",
       email: email || user.email || "No Email",
       skills,

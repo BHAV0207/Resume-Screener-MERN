@@ -4,6 +4,7 @@ const calculateResumeScore = (job, resume) => {
   let skillMatches = 0;
   let experienceScore = 0;
 
+  console.log(skillMatches , experienceScore)
   // -------- Skills scoring --------
   if (Array.isArray(resume.skills) && resume.skills.length > 0) {
     job.requiredSkills.forEach((jobSkill) => {
@@ -17,11 +18,13 @@ const calculateResumeScore = (job, resume) => {
     });
   }
 
+
   const skillScore =
     job.requiredSkills.length > 0
       ? (skillMatches / job.requiredSkills.length) * 70
       : 0;
 
+  console.log(skillScore)
   // -------- Experience scoring --------
   if (job.minExperience > 0) {
     experienceScore =
@@ -30,8 +33,11 @@ const calculateResumeScore = (job, resume) => {
     experienceScore = 10;
   }
 
+  console.log(experienceScore);
+
   // -------- Final score --------
   const finalScore = Math.round(skillScore + experienceScore * 3);
+  console.log(finalScore)
 
   return {
     finalScore,

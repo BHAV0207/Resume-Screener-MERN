@@ -28,7 +28,6 @@ app.use(express.urlencoded({ extended: true }));
 connectDB();
 connectProducer();
 
-
 connectConsumer({
   [TOPICS.USER_REGISTERED]: async (data) => {
     console.log("📨 User registered:", data);
@@ -37,8 +36,13 @@ connectConsumer({
   [TOPICS.RESUME_STATUS]: async (data) => {
     console.log("📨 Resume status update:", data);
   },
+  [TOPICS.AI_ANALYSIS]: async (data) => {
+    console.log("📨  Ai analysis of the recipient:", data);
+  },
+  [TOPICS.AI_ANALYSIS_BATCH]: async (data) => {
+    console.log("📨  Ai analysis of the batch data:", data);
+  },
 });
-
 
 // Basic Route
 app.get("/", (req, res) => {

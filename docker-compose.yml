@@ -48,7 +48,8 @@ services:
       KAFKA_BROKER: kafka:9092
       PORT: 5000
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - kafka-net
@@ -65,7 +66,8 @@ services:
       KAFKA_BROKER: kafka:9092
       PORT: 5001
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - kafka-net
