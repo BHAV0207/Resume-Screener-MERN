@@ -8,6 +8,11 @@ const notificationSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    userType: {
+      type: String,
+      enum: ["admin", "user"],
+      default: "user",
+    },
     title: String,
     message: String,
     type: {

@@ -1,12 +1,22 @@
 require("dotenv").config();
 const express = require("express");
+const http = require("http");
 const cors = require("cors");
 const connectDB = require("./src/config/db");
 const { connectProducer } = require("./src/kafka/producer");
 const { connectConsumer } = require("./src/kafka/consumer");
 const { TOPICS } = require("./src/kafka/topics");
+const { initializeSocket, sendToUser } = require("./src/websocket/socketManager");
+const notificationService = require("./src/services/notificationService");
+const notificationRoutes = require("./src/routes/notification.routes");
 
 const app = express();
+
+// Create HTTP server for Socket.io
+const server = http.createServer(app);
+
+// Initialize WebSocket
+initializeSocket(server);
 
 // Middleware
 app.use(
@@ -28,29 +38,97 @@ app.use(express.urlencoded({ extended: true }));
 connectDB();
 connectProducer();
 
+// Kafka Consumer Handlers - Create DB entries and emit real-time notifications
 connectConsumer({
   [TOPICS.USER_REGISTERED]: async (data) => {
     console.log("📨 User registered:", data);
+    try {
+      const notification = await notificationService.createNotification({
+        userId: data.userId,
+        userType: data.userType || "user",
+        title: "🎉 Welcome!",
+        message: `Hello ${data.name}! Your account has been created successfully.`,
+        type: "SUCCESS",
+        metadata: { email: data.email },
+      });
+
+      sendToUser(data.userId, "notification", notification);
+    } catch (error) {
+      console.error("Error creating user registered notification:", error);
+    }
   },
 
   [TOPICS.RESUME_STATUS]: async (data) => {
     console.log("📨 Resume status update:", data);
+    try {
+      const notification = await notificationService.createNotification({
+        userId: data.userId,
+        userType: "user",
+        title: data.subject,
+        message: data.message,
+        type: data.status === "shortlisted" ? "SUCCESS" : "INFO",
+        metadata: {
+          jobId: data.jobId,
+          resumeId: data.resumeId,
+          status: data.status,
+        },
+      });
+
+      sendToUser(data.userId, "notification", notification);
+    } catch (error) {
+      console.error("Error creating resume status notification:", error);
+    }
   },
+
   [TOPICS.AI_ANALYSIS]: async (data) => {
-    console.log("📨  Ai analysis of the recipient:", data);
+    console.log("📨 AI analysis of the recipient:", data);
+    try {
+      const notification = await notificationService.createNotification({
+        userId: data.adminId,
+        userType: "admin",
+        title: data.Subject,
+        message: data.content,
+        type: "INFO",
+        metadata: {
+          applicantId: data.applicantId,
+          applicantEmail: data.applicantEmail,
+        },
+      });
+
+      sendToUser(data.adminId, "notification", notification);
+    } catch (error) {
+      console.error("Error creating AI analysis notification:", error);
+    }
   },
+
   [TOPICS.AI_ANALYSIS_BATCH]: async (data) => {
-    console.log("📨  Ai analysis of the batch data:", data);
+    console.log("📨 AI analysis of the batch data:", data);
+    try {
+      const notification = await notificationService.createNotification({
+        userId: data.adminId,
+        userType: "admin",
+        title: data.Subject,
+        message: data.content,
+        type: "INFO",
+        metadata: {},
+      });
+
+      sendToUser(data.adminId, "notification", notification);
+    } catch (error) {
+      console.error("Error creating AI batch analysis notification:", error);
+    }
   },
 });
 
-// Basic Route
+// Routes
 app.get("/", (req, res) => {
   res.send("Notification Service is running");
 });
 
+app.use("/api/notifications", notificationRoutes);
+
 // Start Server
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-  console.log(`Notification Service running on port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`🚀 Notification Service running on port ${PORT}`);
 });

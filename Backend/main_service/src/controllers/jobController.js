@@ -186,7 +186,8 @@ const processCandidate = async (req, res, next) => {
     console.log(`Resume status updated to: ${resume.status}`);
 
     await sendMessage(TOPICS.RESUME_STATUS, {
-      recepientId: resume.userId,
+      userType: "user",
+      userId: resume.userId,
       jobId: jobId,
       resumeId: resumeId,
       status: resume.status,
@@ -234,11 +235,12 @@ const rankResumesForJob = async (req, res, next) => {
 
     rankedResumes.sort((a, b) => b.finalScore - a.finalScore);
 
-     await sendMessage(TOPICS.AI_ANALYSIS_BATCH, {
-          adminId: job.createdBy,
-          Subject: `AI analysis of resumes has been completed for the job ${job.title} at ${job.company}`,
-          content: `heighest score is achieved by ${rankedResumes[0].name} , score achieved is ${rankedResumes[0].jobMatchScore}`,
-        });
+    await sendMessage(TOPICS.AI_ANALYSIS_BATCH, {
+      userType: "admin",
+      adminId: job.createdBy,
+      Subject: `AI analysis of resumes has been completed for the job ${job.title} at ${job.company}`,
+      content: `heighest score is achieved by ${rankedResumes[0].name} , score achieved is ${rankedResumes[0].jobMatchScore}`,
+    });
 
     return successResponse(res, "Resumes ranked successfully", {
       job,
@@ -268,6 +270,7 @@ const rankSingleResume = async (req, res, next) => {
     await resume.save();
 
     await sendMessage(TOPICS.AI_ANALYSIS, {
+      userType: "admin",
       adminId: job.createdBy,
       applicantId: resume.userId,
       applicantEmail: resume.email,

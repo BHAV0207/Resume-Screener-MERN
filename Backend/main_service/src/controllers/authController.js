@@ -31,10 +31,10 @@ const register = async (req, res, next) => {
     await newUser.save();
 
     sendMessage(TOPICS.USER_REGISTERED, {
+      userType: type,
       userId: newUser.id,
       email: email,
       name: name,
-      type: type,
     }).catch((err) => {
       console.error("Kafka produce failed", err);
     });
