@@ -1,5 +1,4 @@
-import React from "react";
-import { Menu, User, Settings, Search } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import NotificationBell from "./NotificationBell";
 

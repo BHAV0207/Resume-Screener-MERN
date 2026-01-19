@@ -16,6 +16,7 @@ import Profile from "./components/Profile";
 import UserDashboard from "./UserComponents/UserDashboard";
 import BrowseJobs from "./UserComponents/BrowseJobs";
 import Applications from "./UserComponents/Applications";
+import NotificationsPage from "./pages/NotificationsPage";
 
 
 function App() {
@@ -33,14 +34,15 @@ function App() {
             <ProtectedRoute role="admin" element={<AdminLayout />} />
           }
         >
-          <Route index element={<Navigate to="dashboard" replace/>}/>
+          <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="post-jobs" element={<PostJobs />} />
           <Route path="posted-jobs" element={<PostedJobs />} />
           <Route path="all-resumes" element={<AllResumes />} />
           <Route path="active-jobs" element={<ActiveJobs />} />
-          <Route path="posted-jobs/:id"  element={<JobCandidates />} />
-          <Route path="active-jobs/:id"  element={<JobCandidates />} />
+          <Route path="posted-jobs/:id" element={<JobCandidates />} />
+          <Route path="active-jobs/:id" element={<JobCandidates />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           <Route path="profile" element={<Profile />} />
 
         </Route>
@@ -55,11 +57,12 @@ function App() {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<UserDashboard />} />
           <Route path="browse-jobs" element={<BrowseJobs />} />
-          <Route path="applications" element={<Applications/>} />
+          <Route path="applications" element={<Applications />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           <Route path="profile" element={<Profile />} />
 
         </Route>
-        
+
       </Routes>
     </Router>
   );

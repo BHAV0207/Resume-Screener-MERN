@@ -4,17 +4,17 @@ import App from "./App.jsx";
 import { AuthProvider } from "./store/AuthContext.jsx";
 import { ThemeProvider } from "./store/ThemeContext.jsx";
 import { JobProvider } from "./store/JobContext.jsx";
-import { SocketProvider } from "./store/SocketContext.jsx";
+import { NotificationProvider } from "./store/NotificationContext.jsx";
 import { Toaster } from "react-hot-toast";
 
 createRoot(document.getElementById("root")).render(
   <JobProvider>
     <ThemeProvider>
       <AuthProvider>
-        <SocketProvider>
+        <NotificationProvider>
           <Toaster position="top-right" />
           <App />
-        </SocketProvider>
+        </NotificationProvider>
       </AuthProvider>
     </ThemeProvider>
   </JobProvider>
