@@ -132,7 +132,7 @@ connectConsumer({
         message: "user applied for job",
         type: "INFO",
         metadata: {
-          userId: data.userId ,
+          userId: data.userId,
           jobId: data.jobId,
           name: data.name,
           email: data.email,
@@ -156,4 +156,9 @@ app.use("/api/notifications", notificationRoutes);
 const PORT = process.env.PORT || 5001;
 server.listen(PORT, () => {
   console.log(`🚀 Notification Service running on port ${PORT}`);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  // Optionally: server.close(() => process.exit(1));
 });

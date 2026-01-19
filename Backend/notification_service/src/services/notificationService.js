@@ -42,11 +42,11 @@ const markAsRead = async (id) => {
 const deleteNotification = async (id) => {
   try {
     if (!id) {
-      throw new Error("notification ID is required to delete the notifiaction");
+      throw new Error("notification ID is required to delete the notification");
     }
     return await Notification.findByIdAndDelete(id);
   } catch (error) {
-    console.error("Error marking the notifications", error.message);
+    console.error("Error deleting the notification:", error.message);
     throw error;
   }
 };

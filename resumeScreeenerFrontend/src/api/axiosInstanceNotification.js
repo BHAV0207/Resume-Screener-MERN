@@ -2,7 +2,7 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL:
-    import.meta.env.VITE_NOTIFICATION_SERVICE_URL || "http://localhost:5051",
+    import.meta.env.VITE_NOTIFICATION_SERVICE_URL || "http://localhost:5001",
   headers: {
     "Content-Type": "application/json",
   },

@@ -7,7 +7,7 @@ import axios from "axios";
 
 const NotificationContext = createContext(null);
 
-const NOTIFICATION_SERVICE_BASE_URL = import.meta.env.VITE_NOTIFICATION_SERVICE_URL || "http://localhost:5051/api/";
+const NOTIFICATION_SERVICE_BASE_URL = import.meta.env.VITE_NOTIFICATION_SERVICE_URL || "http://localhost:5051";
 
 // Create a dedicated axios instance for notifications (since it's a different service than main-service)
 const notificationAxios = axios.create({
@@ -47,7 +47,7 @@ export const NotificationProvider = ({ children }) => {
         try {
             // Adjust the endpoint based on your Backend routes
             // If the route is GET /api/notifications/:userId
-            const res = await notificationAxios.get("notifications");
+            const res = await notificationAxios.get("/api/notifications");
             const data = res.data?.data || res.data || [];
             setNotifications(data);
             setUnreadCount(data.filter((n) => !n.isRead).length);
@@ -139,7 +139,7 @@ export const NotificationProvider = ({ children }) => {
     // Mark single notification as read
     const markAsRead = useCallback(async (notificationId) => {
         try {
-            await notificationAxios.patch(`notifications/${notificationId}/read`);
+            await notificationAxios.patch(`/api/notifications/${notificationId}/read`);
             setNotifications((prev) =>
                 prev.map((n) =>
                     n._id === notificationId ? { ...n, isRead: true } : n
@@ -169,7 +169,7 @@ export const NotificationProvider = ({ children }) => {
     // Delete notification
     const deleteNotification = useCallback(async (notificationId) => {
         try {
-            await notificationAxios.delete(`notifications/${notificationId}`);
+            await notificationAxios.delete(`/api/notifications/${notificationId}`);
             setNotifications((prev) => prev.filter((n) => n._id !== notificationId));
             // Recalculate unread count if necessary or just filter
             setUnreadCount((prev) => notifications.find(n => n._id === notificationId && !n.isRead) ? Math.max(0, prev - 1) : prev);
