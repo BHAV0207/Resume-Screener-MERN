@@ -1,4 +1,5 @@
 const { Server } = require("socket.io");
+const socketAuth = require('./SocketAuth')
 
 // Map: userId -> Set of socket IDs (one user can have multiple connections)
 const userSockets = new Map();
@@ -22,8 +23,11 @@ const initializeSocket = (httpServer) => {
         },
     });
 
+    io.use(socketAuth);
+
     io.on("connection", (socket) => {
-        const userId = socket.handshake.query.userId;
+        // userId comes from the auth middleware (socket.user) or fallback to query
+        const userId = socket.user?.id || socket.handshake.query.userId;
 
         if (userId) {
             // Add socket to user's set of connections

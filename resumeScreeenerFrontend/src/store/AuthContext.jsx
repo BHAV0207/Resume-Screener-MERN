@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
 
       // Handle both wrapped { data: { token, user } } and direct { token, user } formats
       const rawData = res.data?.data || res.data;
-      
+
       if (!rawData || !rawData.token) {
         throw new Error("Invalid response format: Missing token");
       }
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
 
       toast.success("Login successful!");
-      
+
       if (userData.type === "admin") {
         navigate("/admin");
       } else {
@@ -73,6 +73,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
+    // Dispatch custom event to notify SocketContext to disconnect
+    window.dispatchEvent(new Event("user-logout"));
     toast.success("Logged out successfully");
     navigate("/login");
   };
