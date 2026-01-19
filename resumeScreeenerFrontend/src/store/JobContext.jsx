@@ -19,7 +19,7 @@ export const JobProvider = ({ children }) => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user?.id) return;
 
-    setLoading(true);
+    setLoading(true); 
     try {
       const allJobsRes = await axiosInstance.get(`/jobs/${user.id}`);
       const activeJobsRes = await axiosInstance.get(`/jobs/${user.id}?active=true`);

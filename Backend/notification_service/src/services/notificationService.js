@@ -26,6 +26,7 @@ const getUserNotification = async (userId) => {
   }
 };
 
+
 const markAsRead = async (id) => {
   try {
     if (!id) {

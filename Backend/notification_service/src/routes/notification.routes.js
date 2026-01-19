@@ -8,7 +8,7 @@ const router = express.Router();
 router.use(authMiddleware);
 
 // GET /api/notifications - Get all notifications for the authenticated user
-router.get("/", ctrl.getNotifications);
+router.get("/:userId", ctrl.getNotifications);
 
 // PATCH /api/notifications/:id/read - Mark notification as read
 router.patch("/:id/read", ctrl.markRead);
