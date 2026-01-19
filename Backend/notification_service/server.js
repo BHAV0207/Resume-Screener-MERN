@@ -6,7 +6,10 @@ const connectDB = require("./src/config/db");
 const { connectProducer } = require("./src/kafka/producer");
 const { connectConsumer } = require("./src/kafka/consumer");
 const { TOPICS } = require("./src/kafka/topics");
-const { initializeSocket, sendToUser } = require("./src/websocket/socketManager");
+const {
+  initializeSocket,
+  sendToUser,
+} = require("./src/websocket/socketManager");
 const notificationService = require("./src/services/notificationService");
 const notificationRoutes = require("./src/routes/notification.routes");
 
@@ -116,6 +119,28 @@ connectConsumer({
       sendToUser(data.adminId, "notification", notification);
     } catch (error) {
       console.error("Error creating AI batch analysis notification:", error);
+    }
+  },
+
+  [TOPICS.RESUME_UPLOAD]: async (data) => {
+    console.log("📨 candidate has applied for job: ", data);
+    try {
+      const notification = await notificationService.createNotification({
+        userId: data.adminId,
+        userType: "admin",
+        title: "applied for a the job",
+        message: "user applied for job",
+        type: "INFO",
+        metadata: {
+          userId: data.userId ,
+          jobId: data.jobId,
+          name: data.name,
+          email: data.email,
+        },
+      });
+      sendToUser(data.adminId, "notification", notification);
+    } catch (err) {
+      console.error("Error creating resume uplaod notification:", err);
     }
   },
 });

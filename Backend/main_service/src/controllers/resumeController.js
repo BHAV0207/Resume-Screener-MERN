@@ -4,6 +4,8 @@ const Job = require("../models/job");
 const User = require("../models/user");
 const { extractResumeData } = require("../utils/aiService");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
+const { sendMessage } = require("../kafka/producer");
+const { TOPICS } = require("../kafka/topics");
 
 const uploadResume = async (req, res, next) => {
   try {
@@ -35,7 +37,9 @@ const uploadResume = async (req, res, next) => {
     const data = await pdfParse(req.file.buffer);
     const parsedText = data.text; // Better to keep original case for LLM
 
-    console.log(`[Resume Controller] Extracted text size: ${parsedText.length}`);
+    console.log(
+      `[Resume Controller] Extracted text size: ${parsedText.length}`,
+    );
 
     // Extract skills and experience using unified AI service
     const { skills, experience } = await extractResumeData(parsedText);
@@ -54,7 +58,22 @@ const uploadResume = async (req, res, next) => {
     job.resumes.push(newResume._id);
     await job.save();
 
-    return successResponse(res, "Resume uploaded successfully and linked to the job", newResume, 201);
+    await sendMessage(TOPICS.RESUME_UPLOAD, {
+      userType: "admin",
+      adminId: job.createdBy,
+      userId: req.user.userID,
+      jobId: jobId,
+      name: name,
+      email: email,
+    });
+    console.log("Kafka message sent successfully from controller");
+
+    return successResponse(
+      res,
+      "Resume uploaded successfully and linked to the job",
+      newResume,
+      201,
+    );
   } catch (err) {
     next(err);
   }
@@ -70,7 +89,7 @@ const updateResume = async (req, res, next) => {
     const updatedResume = await Resume.findByIdAndUpdate(
       resumeId,
       { status },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedResume) return errorResponse(res, "Resume not found", 404);
@@ -91,7 +110,10 @@ const getResumesById = async (req, res, next) => {
     const job = await Job.findOne({ resumes: id });
     if (!job) return errorResponse(res, "Job not found for this resume", 404);
 
-    return successResponse(res, "Resume details fetched successfully", { resume, job });
+    return successResponse(res, "Resume details fetched successfully", {
+      resume,
+      job,
+    });
   } catch (err) {
     next(err);
   }
@@ -102,17 +124,26 @@ const shortlistedResumes = async (req, res, next) => {
     const { adminId } = req.params;
 
     const jobs = await Job.find({ createdBy: adminId }).select("_id resumes");
-    const resumeIds = jobs.flatMap(job => job.resumes);
+    const resumeIds = jobs.flatMap((job) => job.resumes);
 
     const resumes = await Resume.find({
       _id: { $in: resumeIds },
       status: "shortlisted",
     });
 
-    return successResponse(res, "Shortlisted resumes fetched successfully", resumes);
+    return successResponse(
+      res,
+      "Shortlisted resumes fetched successfully",
+      resumes,
+    );
   } catch (err) {
     next(err);
   }
 };
 
-module.exports = { uploadResume, shortlistedResumes, updateResume, getResumesById };
+module.exports = {
+  uploadResume,
+  shortlistedResumes,
+  updateResume,
+  getResumesById,
+};
