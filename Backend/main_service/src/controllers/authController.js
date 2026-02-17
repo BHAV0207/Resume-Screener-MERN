@@ -64,10 +64,10 @@ const login = async (req, res, next) => {
     }
 
     const token = jwt.sign(
-      { userId: user._id, email: user.email, type: user.type },
+      { userId: user._id, email: user.email , type: user.type },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
-    );
+    ); 
 
     return successResponse(res, "Login successful", {
       token,
@@ -82,5 +82,6 @@ const login = async (req, res, next) => {
     next(err);
   }
 };
+
 
 module.exports = { login, register };

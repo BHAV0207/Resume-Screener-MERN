@@ -14,9 +14,7 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log("Login Attempt:", { email });
       const res = await axiosInstance.post("/user/login", { email, password });
-      console.log("Full Login Response:", res);
 
-      // Handle both wrapped { data: { token, user } } and direct { token, user } formats
       const rawData = res.data?.data || res.data;
 
       if (!rawData || !rawData.token) {

@@ -29,8 +29,7 @@ const uploadResume = async (req, res, next) => {
       user.appliedJobs.push(jobId);
       await user.save();
     } else {
-      // Optional: Return error if already applied
-      // return errorResponse(res, "You have already applied for this job", 400);
+      // return errorResponse(res, "You have Already Apllied" ,400)
     }
 
     // Extract text from PDF
@@ -46,6 +45,7 @@ const uploadResume = async (req, res, next) => {
 
     const newResume = new Resume({
       userId: userID,
+      jobId: jobId,
       name: name || user.name || "Unknown",
       email: email || user.email || "No Email",
       skills,
@@ -141,9 +141,29 @@ const shortlistedResumes = async (req, res, next) => {
   }
 };
 
+const getAllResumesByUserID = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+
+    const resumes = await Resume.find({ userId }).populate("jobId");
+
+    if (!resumes.length) {
+      return errorResponse(res, "No resumes found", 404);
+    }
+
+    return successResponse(res, "Resume details fetched successfully", {
+      resumes,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
 module.exports = {
   uploadResume,
   shortlistedResumes,
   updateResume,
   getResumesById,
+  getAllResumesByUserID,
 };

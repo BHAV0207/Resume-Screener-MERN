@@ -6,6 +6,11 @@ const ResumeSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  jobId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Job",
+   // required: true,
+  },
   name: String,
   email: String,
   skills: [String],
