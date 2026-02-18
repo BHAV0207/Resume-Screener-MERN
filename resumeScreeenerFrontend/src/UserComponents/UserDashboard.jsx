@@ -32,6 +32,10 @@ function UserDashboard() {
     (item) => item.status === "evaluation",
   ).length;
 
+  const recentResumes = [...resumes]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5);
+
   // This would ideally come from a context/API, using dummy data for now as per project scope
   const stats = [
     {
@@ -136,7 +140,7 @@ function UserDashboard() {
           </div>
 
           {/* Activity Section */}
-          <div className="bg-white p-10 rounded-[3.5rem] border border-slate-100 shadow-sm">
+          <div className="bg-white p-10 rounded-[3.5rem] border border-slate-100 shadow-sm max-h-[500px] overflow-auto">
             <div className="flex items-center justify-between mb-10">
               <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase">
                 Recent Pulse
@@ -144,7 +148,7 @@ function UserDashboard() {
               <TrendingUp className="text-emerald-500 w-8 h-8" />
             </div>
             <div className="space-y-6">
-              {resumes.map((item) => (
+              {recentResumes.map((item) => (
                 <div
                   key={item._id}
                   className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 hover:border-emerald-100 transition-colors"
@@ -197,7 +201,18 @@ function UserDashboard() {
                 </div>
               ))}
             </div>
+                 {resumes.length > 2 && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={() => navigate("/user/applications")}
+                className="px-8 py-3 rounded-xl bg-slate-900 text-white text-sm font-black uppercase tracking-widest hover:bg-emerald-600 transition-colors"
+              >
+                View More
+              </button>
+            </div>
+          )}
           </div>
+     
         </div>
 
         {/* Sidebar info */}

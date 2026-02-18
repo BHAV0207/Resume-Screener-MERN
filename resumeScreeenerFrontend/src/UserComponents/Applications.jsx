@@ -1,4 +1,3 @@
-import React from "react";
 import {
   CheckCircle2,
   Clock,
@@ -11,9 +10,15 @@ import {
 } from "lucide-react";
 import { useContext } from "react";
 import { ResumeContext } from "../store/ResumeContext";
+import { useEffect } from "react";
 
 function Applications() {
-  const { resumes } = useContext(ResumeContext);
+  const { fetchResumesByUserId, resumes } = useContext(ResumeContext);
+
+  useEffect(() => {
+    fetchResumesByUserId();
+  }, []);
+
   console.log(resumes);
   // Keeping the sample data for now as per current project architecture
 
@@ -110,6 +115,11 @@ function Applications() {
                     <span className="mr-3">{config.icon}</span>
                     {item.status}
                   </span>
+                  {typeof item.jobMatchScore === "number" && (
+                    <span className="px-5 py-2 rounded-xl bg-slate-900 text-emerald-400 text-[10px] font-black uppercase tracking-widest shadow">
+                      Match Score: {item.jobMatchScore}%
+                    </span>
+                  )}
                 </div>
               </div>
 
