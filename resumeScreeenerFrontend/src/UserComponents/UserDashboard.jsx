@@ -16,7 +16,7 @@ import { useEffect } from "react";
 function UserDashboard() {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
-  const { fetchResumesByUserId, resumes, loading } = useContext(ResumeContext);
+  const { fetchResumesByUserId, resumes } = useContext(ResumeContext);
 
   useEffect(() => {
     fetchResumesByUserId();

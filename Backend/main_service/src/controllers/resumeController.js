@@ -6,6 +6,7 @@ const { extractResumeData } = require("../utils/aiService");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
 const { sendMessage } = require("../kafka/producer");
 const { TOPICS } = require("../kafka/topics");
+const { UploadTimeResumeScoreingForUser } = require("../utils/resumeScoring");
 
 const uploadResume = async (req, res, next) => {
   try {
@@ -42,8 +43,11 @@ const uploadResume = async (req, res, next) => {
 
     // Extract skills and experience using unified AI service
     const { skills, experience } = await extractResumeData(parsedText);
-    console.log("JOB ID RECEIVED:", jobId);
-    
+
+    //extracting the score of the resume for the particular job 
+    const score = await UploadTimeResumeScoreingForUser(job , skills , experience)
+    console.log(score);
+
     const newResume = new Resume({
       userId: userID,
       jobId: jobId,
@@ -51,6 +55,7 @@ const uploadResume = async (req, res, next) => {
       email: email || user.email || "No Email",
       skills,
       experience,
+      jobMatchScore: score.finalScore,
       parsedText: parsedText.toLowerCase(), // Store lowercase for searching if needed
     });
 
