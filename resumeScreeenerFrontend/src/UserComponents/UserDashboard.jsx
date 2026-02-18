@@ -61,7 +61,7 @@ function UserDashboard() {
     },
     {
       title: "Success Rate",
-      value: (shortlistedCount / resumes?.length) * 100 + "%",
+      value: Math.round((shortlistedCount / resumes?.length) * 100, 2) + "%",
       icon: TrendingUp,
       color: "text-emerald-400",
       bgColor: "bg-emerald-500/10",
@@ -201,18 +201,17 @@ function UserDashboard() {
                 </div>
               ))}
             </div>
-                 {resumes.length > 2 && (
-            <div className="flex justify-center mt-8">
-              <button
-                onClick={() => navigate("/user/applications")}
-                className="px-8 py-3 rounded-xl bg-slate-900 text-white text-sm font-black uppercase tracking-widest hover:bg-emerald-600 transition-colors"
-              >
-                View More
-              </button>
-            </div>
-          )}
+            {resumes.length > 2 && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={() => navigate("/user/applications")}
+                  className="px-8 py-3 rounded-xl bg-slate-900 text-white text-sm font-black uppercase tracking-widest hover:bg-emerald-600 transition-colors"
+                >
+                  View More
+                </button>
+              </div>
+            )}
           </div>
-     
         </div>
 
         {/* Sidebar info */}
