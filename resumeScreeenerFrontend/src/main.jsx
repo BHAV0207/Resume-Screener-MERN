@@ -6,16 +6,19 @@ import { ThemeProvider } from "./store/ThemeContext.jsx";
 import { JobProvider } from "./store/JobContext.jsx";
 import { NotificationProvider } from "./store/NotificationContext.jsx";
 import { Toaster } from "react-hot-toast";
+import { ResumeProvider } from "./store/ResumeContext.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <JobProvider>
-    <ThemeProvider>
-      <AuthProvider>
-        <NotificationProvider>
-          <Toaster position="top-right" />
-          <App />
-        </NotificationProvider>
-      </AuthProvider>
-    </ThemeProvider>
-  </JobProvider>
+  <ResumeProvider>
+    <JobProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <Toaster position="top-right" />
+            <App />
+          </NotificationProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </JobProvider>
+  </ResumeProvider>,
 );

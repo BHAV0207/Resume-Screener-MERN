@@ -42,7 +42,8 @@ const uploadResume = async (req, res, next) => {
 
     // Extract skills and experience using unified AI service
     const { skills, experience } = await extractResumeData(parsedText);
-
+    console.log("JOB ID RECEIVED:", jobId);
+    
     const newResume = new Resume({
       userId: userID,
       jobId: jobId,

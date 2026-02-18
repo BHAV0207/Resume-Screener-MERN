@@ -13,17 +13,19 @@ export const JobProvider = ({ children }) => {
   const [allJobs, setAllJobs] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  console.log(resumes)
+  console.log(resumes);
 
   const fetchAdminJobStats = useCallback(async () => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user?.id) return;
 
-    setLoading(true); 
+    setLoading(true);
     try {
       const allJobsRes = await axiosInstance.get(`/jobs/${user.id}`);
-      const activeJobsRes = await axiosInstance.get(`/jobs/${user.id}?active=true`);
-      
+      const activeJobsRes = await axiosInstance.get(
+        `/jobs/${user.id}?active=true`,
+      );
+
       setTotalJobs(allJobsRes.data.data || []);
       setActiveJobs(activeJobsRes.data.data || []);
     } catch (err) {
@@ -39,9 +41,9 @@ export const JobProvider = ({ children }) => {
 
     setLoading(true);
     try {
-      console.log(user.id)
+      console.log(user.id);
       const res = await axiosInstance.get(`/jobs/${user.id}/resumes`);
-      console.log(res)
+      console.log(res);
       setResumes(res.data.data.resumes || []);
     } catch (err) {
       console.error("Error fetching admin resumes:", err);
@@ -87,58 +89,70 @@ export const JobProvider = ({ children }) => {
     }
   }, []);
 
-  const createJob = useCallback(async (jobData) => {
-    setLoading(true);
-    try {
-      await axiosInstance.post("/jobs/create", jobData);
-      toast.success("Job created successfully!");
-      fetchAdminJobStats();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Error creating job");
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchAdminJobStats]);
+  const createJob = useCallback(
+    async (jobData) => {
+      setLoading(true);
+      try {
+        await axiosInstance.post("/jobs/create", jobData);
+        toast.success("Job created successfully!");
+        fetchAdminJobStats();
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Error creating job");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchAdminJobStats],
+  );
 
-  const deleteJob = useCallback(async (jobId) => {
-    if (!window.confirm("Are you sure you want to delete this job?")) return;
-    try {
-      await axiosInstance.delete(`/jobs/${jobId}`);
-      toast.success("Job deleted successfully");
-      fetchAdminJobStats();
-    } catch (err) {
-      toast.error("Error deleting job");
-    }
-  }, [fetchAdminJobStats]);
+  const deleteJob = useCallback(
+    async (jobId) => {
+      if (!window.confirm("Are you sure you want to delete this job?")) return;
+      try {
+        await axiosInstance.delete(`/jobs/${jobId}`);
+        toast.success("Job deleted successfully");
+        fetchAdminJobStats();
+      } catch (error) {
+        toast.error(error,"Error deleting job");
+      }
+    },
+    [fetchAdminJobStats],
+  );
 
-  const updateJob = useCallback(async (jobId, updatedData) => {
-    try {
-      await axiosInstance.put(`/jobs/${jobId}`, updatedData);
-      toast.success("Job updated successfully");
-      fetchAdminJobStats();
-    } catch (err) {
-      toast.error("Error updating job");
-    }
-  }, [fetchAdminJobStats]);
+  const updateJob = useCallback(
+    async (jobId, updatedData) => {
+      try {
+        await axiosInstance.put(`/jobs/${jobId}`, updatedData);
+        toast.success("Job updated successfully");
+        fetchAdminJobStats();
+      } catch (error) {
+        toast.error(error,"Error updating job");
+      }
+    },
+    [fetchAdminJobStats],
+  );
 
   const applyForJob = useCallback(async (file, jobId) => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user?.id) return;
 
     const formData = new FormData();
-    formData.append('resume', file);
-    formData.append('name', user.name || "Unknown");
-    formData.append('email', user.email || "No Email");
-    formData.append('jobId', jobId);
+    formData.append("resume", file);
+    formData.append("name", user.name || "Unknown");
+    formData.append("email", user.email || "No Email");
+    formData.append("jobId", jobId);
 
     setLoading(true);
     try {
       await axiosInstance.post("/resumes/upload", formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { "Content-Type": "multipart/form-data" },
       });
+
       toast.success("Application submitted successfully!");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Error submitting application");
+      toast.error(
+        err.response?.data?.message || "Error submitting application",
+      );
     } finally {
       setLoading(false);
     }
@@ -148,9 +162,9 @@ export const JobProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await axiosInstance.get(`/jobs/${jobId}/rank-resumes`);
-      return res.data.data.rankedResumes.map(item => ({
+      return res.data.data.rankedResumes.map((item) => ({
         ...item.resume,
-        matchScore: item.finalScore
+        matchScore: item.finalScore,
       }));
     } catch (err) {
       toast.error("Error ranking resumes");
@@ -161,8 +175,10 @@ export const JobProvider = ({ children }) => {
 
   const rankSingleResume = useCallback(async (jobId, resumeId) => {
     try {
-      console.log(jobId, resumeId)
-      const res = await axiosInstance.get(`/jobs/${jobId}/rank-resume/${resumeId}`);
+      console.log(jobId, resumeId);
+      const res = await axiosInstance.get(
+        `/jobs/${jobId}/rank-resume/${resumeId}`,
+      );
       console.log(res.data);
       return res.data.data.finalScore;
     } catch (err) {
@@ -170,15 +186,18 @@ export const JobProvider = ({ children }) => {
     }
   }, []);
 
-  const processCandidate = useCallback(async (jobId, resumeId, action) => {
-    try {
-      await axiosInstance.post("/jobs/process", { jobId, resumeId, action });
-      toast.success(`Candidate ${action}ed successfully`);
-      getJobById(jobId); // Refresh job details to show updated status
-    } catch (err) {
-      toast.error(`Error ${action}ing candidate`);
-    }
-  }, [getJobById]);
+  const processCandidate = useCallback(
+    async (jobId, resumeId, action) => {
+      try {
+        await axiosInstance.post("/jobs/process", { jobId, resumeId, action });
+        toast.success(`Candidate ${action}ed successfully`);
+        getJobById(jobId); // Refresh job details to show updated status
+      } catch (err) {
+        toast.error(`Error ${action}ing candidate`);
+      }
+    },
+    [getJobById],
+  );
 
   return (
     <JobContext.Provider

@@ -10,39 +10,54 @@ import {
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../store/AuthContext";
 import { useContext } from "react";
+import { ResumeContext } from "../store/ResumeContext";
+import { useEffect } from "react";
 
 function UserDashboard() {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const { fetchResumesByUserId, resumes, loading } = useContext(ResumeContext);
 
-  console.log(user);
+  useEffect(() => {
+    fetchResumesByUserId();
+  }, []);
+
+  console.log(resumes);
+
+  const shortlistedCount = resumes.filter(
+    (item) => item.status === "shortlisted",
+  ).length;
+
+  const underEvaluation = resumes.filter(
+    (item) => item.status === "evaluation",
+  ).length;
 
   // This would ideally come from a context/API, using dummy data for now as per project scope
   const stats = [
     {
       title: "Active Applications",
-      value: 0,
+      value: resumes?.length,
       icon: Briefcase,
       color: "text-emerald-500",
       bgColor: "bg-emerald-500/10",
     },
     {
       title: "Shortlisted Applications",
-      value: "85%",
+      value: shortlistedCount,
       icon: BrainCircuit,
       color: "text-emerald-400",
       bgColor: "bg-emerald-500/10",
     },
     {
       title: "Rejected Applications",
-      value: "45",
+      value: resumes?.length - shortlistedCount - underEvaluation,
       icon: Zap,
       color: "text-emerald-500",
       bgColor: "bg-emerald-500/10",
     },
     {
       title: "Success Rate",
-      value: "25%",
+      value: (shortlistedCount / resumes?.length) * 100 + "%",
       icon: TrendingUp,
       color: "text-emerald-400",
       bgColor: "bg-emerald-500/10",
@@ -129,47 +144,58 @@ function UserDashboard() {
               <TrendingUp className="text-emerald-500 w-8 h-8" />
             </div>
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row items-center justify-between p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 hover:border-emerald-100 transition-colors group">
-                <div className="flex items-center space-x-6">
-                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-slate-200 group-hover:scale-105 transition-transform">
-                    <Building size={24} className="text-emerald-500" />
-                  </div>
-                  <div>
-                    <p className="font-black text-slate-900 text-lg tracking-tight uppercase">
-                      Tech Lead @ GlobalConnect
-                    </p>
-                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">
-                      Under Review • Cycle 042
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-4 sm:mt-0">
-                  <span className="px-5 py-2 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-emerald-900/20">
-                    Neural Check
-                  </span>
-                </div>
-              </div>
+              {resumes.map((item) => (
+                <div
+                  key={item._id}
+                  className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 hover:border-emerald-100 transition-colors"
+                >
+                  {/* Left section */}
+                  <div className="flex items-center space-x-6">
+                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg">
+                      <Building size={24} className="text-emerald-500" />
+                    </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-between p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 opacity-60 group">
-                <div className="flex items-center space-x-6">
-                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                    <Building size={24} className="text-slate-400" />
+                    <div>
+                      <p className="font-black text-slate-900 text-lg uppercase">
+                        {item.jobId?.company}
+                      </p>
+                      <p className="text-xs font-black uppercase text-slate-400">
+                        {item.jobId?.title}
+                      </p>
+                      <p className="text-sm text-slate-600 line-clamp-2">
+                        {item.jobId?.description}
+                      </p>
+
+                      <p className="text-sm text-slate-600 mt-1">
+                        <span className="font-semibold">Salary:</span>{" "}
+                        {item.jobId?.salary}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-black text-slate-900 text-lg tracking-tight uppercase opacity-50">
-                      UI Designer @ PixelPerfect
-                    </p>
-                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">
-                      Archived • Cycle 038
-                    </p>
+
+                  {/* Right section (badges) */}
+                  <div className="flex gap-3">
+                    {/* Location badge */}
+                    <span className="px-5 py-2 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl">
+                      {item.jobId?.location}
+                    </span>
+
+                    {/* Status badge */}
+                    <span
+                      className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl
+          ${
+            item.status === "shortlisted"
+              ? "bg-green-600 text-white"
+              : item.status === "rejected"
+                ? "bg-red-600 text-white"
+                : "bg-yellow-500 text-white"
+          }`}
+                    >
+                      {item.status}
+                    </span>
                   </div>
                 </div>
-                <div className="mt-4 sm:mt-0">
-                  <span className="px-5 py-2 bg-slate-200 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest">
-                    Protocol Finalized
-                  </span>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
