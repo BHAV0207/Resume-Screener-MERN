@@ -4,7 +4,7 @@ const stringSimilarity = require("string-similarity");
 const User = require("../models/user");
 const sendEmail = require("../utils/emailService");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
-const calculateResumeScore = require("../utils/resumeScoring");
+const {calculateResumeScore} = require("../utils/resumeScoring");
 const { sendMessage } = require("../kafka/producer");
 const { TOPICS } = require("../kafka/topics");
 

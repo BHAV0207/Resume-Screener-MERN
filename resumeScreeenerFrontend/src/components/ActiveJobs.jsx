@@ -1,10 +1,9 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
 import {
   Search,
   MapPin,
   DollarSign,
   Briefcase,
-  Clock,
   Calendar,
   Users,
   Share2,
