@@ -4,9 +4,11 @@ const stringSimilarity = require("string-similarity");
 const User = require("../models/user");
 const sendEmail = require("../utils/emailService");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
-const {calculateResumeScore} = require("../utils/resumeScoring");
-const { sendMessage } = require("../kafka/producer");
-const { TOPICS } = require("../kafka/topics");
+const { calculateResumeScore } = require("../utils/resumeScoring");
+const { TOPICS } = require("../events/topics");
+const createEventBus = require("../EVENT-BUS/eventbus.factory");
+
+const eventBus = createEventBus();
 
 // 1️⃣ Create a new job posting
 const createJob = async (req, res, next) => {
@@ -185,7 +187,23 @@ const processCandidate = async (req, res, next) => {
 
     console.log(`Resume status updated to: ${resume.status}`);
 
-    await sendMessage(TOPICS.RESUME_STATUS, {
+    await eventBus.publish(TOPICS.RESUME_STATUS, {
+      eventType: TOPICS.USER_REGISTERED,
+      data: {
+        userType: "user",
+        userId: resume.userId,
+        jobId: jobId,
+        resumeId: resumeId,
+        status: resume.status,
+        email: resume.email,
+        subject: subject,
+        message: message,
+      },
+      timestamp: Date.now(),
+      source: "main-service",
+    });
+
+    /*   await sendMessage(TOPICS.RESUME_STATUS, {
       userType: "user",
       userId: resume.userId,
       jobId: jobId,
@@ -194,7 +212,7 @@ const processCandidate = async (req, res, next) => {
       email: resume.email,
       subject: subject,
       message: message,
-    });
+    });*/
     console.log("Kafka message sent successfully from controller");
 
     return successResponse(res, `Candidate ${action}ed successfully`);
@@ -235,12 +253,24 @@ const rankResumesForJob = async (req, res, next) => {
 
     rankedResumes.sort((a, b) => b.finalScore - a.finalScore);
 
-    await sendMessage(TOPICS.AI_ANALYSIS_BATCH, {
+    await eventBus(TOPICS.AI_ANALYSIS_BATCH, {
+      eventType: TOPICS.AI_ANALYSIS_BATCH,
+      data: {
+        userType: "admin",
+        adminId: job.createdBy,
+        Subject: `AI analysis of resumes has been completed for the job ${job.title} at ${job.company}`,
+        content: `heighest score is achieved by ${rankedResumes[0].name} , score achieved is ${rankedResumes[0].jobMatchScore}`,
+      },
+      timestamp: Date.now(),
+      source: "main-service",
+    });
+
+    /*  await sendMessage(TOPICS.AI_ANALYSIS_BATCH, {
       userType: "admin",
       adminId: job.createdBy,
       Subject: `AI analysis of resumes has been completed for the job ${job.title} at ${job.company}`,
       content: `heighest score is achieved by ${rankedResumes[0].name} , score achieved is ${rankedResumes[0].jobMatchScore}`,
-    });
+    }); */
 
     return successResponse(res, "Resumes ranked successfully", {
       job,
@@ -269,14 +299,28 @@ const rankSingleResume = async (req, res, next) => {
     resume.jobMatchScore = finalScore;
     await resume.save();
 
-    await sendMessage(TOPICS.AI_ANALYSIS, {
+    await eventBus.publish(TOPICS.AI_ANALYSIS, {
+      eventType: TOPICS.AI_ANALYSIS,
+      data: {
+        userType: "admin",
+        adminId: job.createdBy,
+        applicantId: resume.userId,
+        applicantEmail: resume.email,
+        Subject: `AI analysis of ${resume.name} has been completed for the job ${job.title} at ${job.company}`,
+        content: `score achieved is ${finalScore}`,
+      },
+      timestamp: Date.now(),
+      source: "main-servcice",
+    });
+
+    /* await sendMessage(TOPICS.AI_ANALYSIS, {
       userType: "admin",
       adminId: job.createdBy,
       applicantId: resume.userId,
       applicantEmail: resume.email,
       Subject: `AI analysis of ${resume.name} has been completed for the job ${job.title} at ${job.company}`,
       content: `score achieved is ${finalScore}`,
-    });
+    }); */
 
     return successResponse(res, "Resume ranked successfully", {
       resume,

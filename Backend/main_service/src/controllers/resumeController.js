@@ -4,9 +4,11 @@ const Job = require("../models/job");
 const User = require("../models/user");
 const { extractResumeData } = require("../utils/aiService");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
-const { sendMessage } = require("../kafka/producer");
-const { TOPICS } = require("../kafka/topics");
+const { TOPICS } = require("../events/topics");
 const { UploadTimeResumeScoreingForUser } = require("../utils/resumeScoring");
+const createEventBus = require("../EVENT-BUS/eventbus.factory");
+
+const eventBus = createEventBus();
 
 const uploadResume = async (req, res, next) => {
   try {
@@ -44,8 +46,12 @@ const uploadResume = async (req, res, next) => {
     // Extract skills and experience using unified AI service
     const { skills, experience } = await extractResumeData(parsedText);
 
-    //extracting the score of the resume for the particular job 
-    const score = await UploadTimeResumeScoreingForUser(job , skills , experience)
+    //extracting the score of the resume for the particular job
+    const score = await UploadTimeResumeScoreingForUser(
+      job,
+      skills,
+      experience,
+    );
     console.log(score);
 
     const newResume = new Resume({
@@ -64,6 +70,20 @@ const uploadResume = async (req, res, next) => {
     job.resumes.push(newResume._id);
     await job.save();
 
+    await eventBus.publish(TOPICS.RESUME_UPLOAD, {
+      eventType: TOPICS.RESUME_UPLOAD,
+      data: {
+        userType: "admin",
+        adminId: job.createdBy,
+        userId: req.user.userID,
+        jobId: jobId,
+        name: name,
+        email: email,
+      },
+      timestamp: Date.now(),
+      source: "main-service",
+    });
+    /*
     await sendMessage(TOPICS.RESUME_UPLOAD, {
       userType: "admin",
       adminId: job.createdBy,
@@ -71,7 +91,7 @@ const uploadResume = async (req, res, next) => {
       jobId: jobId,
       name: name,
       email: email,
-    });
+    }); */
     console.log("Kafka message sent successfully from controller");
 
     return successResponse(
@@ -164,7 +184,6 @@ const getAllResumesByUserID = async (req, res, next) => {
     next(err);
   }
 };
-
 
 module.exports = {
   uploadResume,
