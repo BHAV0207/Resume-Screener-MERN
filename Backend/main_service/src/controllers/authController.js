@@ -2,8 +2,10 @@ const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
-const { sendMessage } = require("../kafka/producer");
-const { TOPICS } = require("../kafka/topics");
+const { TOPICS } = require("../events/topics");
+const createEventBus = require("../EVENT-BUS/eventbus.factory");
+
+const eventBus = createEventBus();
 
 const register = async (req, res, next) => {
   try {
@@ -30,14 +32,25 @@ const register = async (req, res, next) => {
 
     await newUser.save();
 
-    sendMessage(TOPICS.USER_REGISTERED, {
+    await eventBus.publish(TOPICS.USER_REGISTERED, {
+      eventType: TOPICS.USER_REGISTERED,
+      data: {
+        userType: type,
+        userId: newUser.id,
+        email: email,
+        name: name,
+      },
+      timestamp: Date.now(),
+      source: "main-service",
+    });
+    /*  sendMessage(TOPICS.USER_REGISTERED, {
       userType: type,
       userId: newUser.id,
       email: email,
       name: name,
     }).catch((err) => {
       console.error("Kafka produce failed", err);
-    });
+    }); */
 
     return successResponse(res, "User registered successfully", {}, 201);
   } catch (err) {
@@ -64,10 +77,10 @@ const login = async (req, res, next) => {
     }
 
     const token = jwt.sign(
-      { userId: user._id, email: user.email , type: user.type },
+      { userId: user._id, email: user.email, type: user.type },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    ); 
+      { expiresIn: "1d" },
+    );
 
     return successResponse(res, "Login successful", {
       token,
@@ -82,6 +95,5 @@ const login = async (req, res, next) => {
     next(err);
   }
 };
-
 
 module.exports = { login, register };
