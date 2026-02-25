@@ -26,7 +26,7 @@ const errorHandler = require("./src/middleware/errorHandler");
 
 // Connect to Database
 connectDB();
-connectProducer();
+//connectProducer();
 
 // Routes
 app.use("/api/resumes", require("./src/routes/resumeRoutes"));
