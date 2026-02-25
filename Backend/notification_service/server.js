@@ -87,7 +87,7 @@ eventBus.subscribe(TOPICS.RESUME_STATUS, async (event) => {
 
 eventBus.subscribe(TOPICS.AI_ANALYSIS, async (event) => {
   const data = event.data;
-
+  console.log(data);
   try {
     const notification = await notificationService.createNotification({
       userId: data.adminId,
@@ -109,7 +109,7 @@ eventBus.subscribe(TOPICS.AI_ANALYSIS, async (event) => {
 
 eventBus.subscribe(TOPICS.AI_ANALYSIS_BATCH, async (event) => {
   const data = event.data;
-
+  console.log(data);
   try {
     const notification = await notificationService.createNotification({
       userId: data.adminId,

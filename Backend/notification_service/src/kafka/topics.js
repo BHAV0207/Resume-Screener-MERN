@@ -1,4 +1,4 @@
-const TOPICS = {
+/*const TOPICS = {
   USER_REGISTERED: "user.registered",
   RESUME_STATUS: "resume.status",
   AI_ANALYSIS: "ai.analysis",
@@ -9,3 +9,4 @@ const TOPICS = {
 module.exports = {
   TOPICS,
 };
+*/

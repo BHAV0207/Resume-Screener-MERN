@@ -75,7 +75,7 @@ const uploadResume = async (req, res, next) => {
       data: {
         userType: "admin",
         adminId: job.createdBy,
-        userId: req.user.userID,
+        userId: userID,
         jobId: jobId,
         name: name,
         email: email,
@@ -83,15 +83,7 @@ const uploadResume = async (req, res, next) => {
       timestamp: Date.now(),
       source: "main-service",
     });
-    /*
-    await sendMessage(TOPICS.RESUME_UPLOAD, {
-      userType: "admin",
-      adminId: job.createdBy,
-      userId: req.user.userID,
-      jobId: jobId,
-      name: name,
-      email: email,
-    }); */
+    
     console.log("Kafka message sent successfully from controller");
 
     return successResponse(

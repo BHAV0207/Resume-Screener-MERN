@@ -1,4 +1,4 @@
-const { Kafka } = require("kafkajs");
+/*const { Kafka } = require("kafkajs");
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -20,3 +20,4 @@ const kafka = new Kafka({
 });
 
 module.exports = { kafka };
+*/

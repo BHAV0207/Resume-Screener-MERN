@@ -1,4 +1,4 @@
-const { kafka } = require("./kafka");
+/*const { kafka } = require("./kafka");
 
 const consumer = kafka.consumer({
   groupId: "main-service-group",
@@ -39,3 +39,4 @@ module.exports = {
   consumer,
   connectConsumer,
 };
+*/

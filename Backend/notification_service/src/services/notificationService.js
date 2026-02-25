@@ -7,7 +7,9 @@ const createNotification = async (payload) => {
     }
 
     const notification = await Notification.create(payload);
+    console.log(notification);
     return notification;
+
   } catch (error) {
     console.error("Error creating notification:", error.message);
     throw error; // important so caller (Kafka consumer / controller) can handle it
