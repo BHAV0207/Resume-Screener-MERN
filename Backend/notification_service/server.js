@@ -3,9 +3,8 @@ const express = require("express");
 const http = require("http");
 const cors = require("cors");
 const connectDB = require("./src/config/db");
-const { connectProducer } = require("./src/kafka/producer");
-const { connectConsumer } = require("./src/kafka/consumer");
-const { TOPICS } = require("./src/kafka/topics");
+const createEventBus = require("./src/EVENT-BUS/event-bus.factory");
+const { TOPICS } = require("./src/events/topics");
 const {
   initializeSocket,
   sendToUser,
@@ -39,110 +38,116 @@ app.use(express.urlencoded({ extended: true }));
 
 // Connect to Database
 connectDB();
-connectProducer();
 
-// Kafka Consumer Handlers - Create DB entries and emit real-time notifications
-connectConsumer({
-  [TOPICS.USER_REGISTERED]: async (data) => {
-    console.log("📨 User registered:", data);
-    try {
-      const notification = await notificationService.createNotification({
+// creating an instance of the eventbus class that we have created
+const eventBus = createEventBus();
+
+// message via the event bus
+eventBus.subscribe(TOPICS.USER_REGISTERED, async (event) => {
+  const data = event.data;
+  console.log(data);
+  try {
+    const notification = await notificationService.createNotification({
+      userId: data.userId,
+      userType: data.userType || "user",
+      title: "🎉 Welcome!",
+      message: `Hello ${data.name}! Your account has been created successfully.`,
+      type: "SUCCESS",
+      metadata: { email: data.email },
+    });
+
+    sendToUser(data.userId, "notification", notification);
+  } catch (error) {
+    console.error("Error creating user registered notification:", error);
+  }
+});
+
+eventBus.subscribe(TOPICS.RESUME_STATUS, async (event) => {
+  const data = event.data;
+  console.log("📨 Resume status update:", data);
+  try {
+    const notification = await notificationService.createNotification({
+      userId: data.userId,
+      userType: "user",
+      title: data.subject,
+      message: data.message,
+      type: data.status === "shortlisted" ? "SUCCESS" : "INFO",
+      metadata: {
+        jobId: data.jobId,
+        resumeId: data.resumeId,
+        status: data.status,
+      },
+    });
+
+    sendToUser(data.userId, "notification", notification);
+  } catch (error) {
+    console.error("Error creating resume status notification:", error);
+  }
+});
+
+eventBus.subscribe(TOPICS.AI_ANALYSIS, async (event) => {
+  const data = event.data;
+
+  try {
+    const notification = await notificationService.createNotification({
+      userId: data.adminId,
+      userType: "admin",
+      title: data.subject,
+      message: data.content,
+      type: "INFO",
+      metadata: {
+        applicantId: data.applicantId,
+        applicantEmail: data.applicantEmail,
+      },
+    });
+
+    sendToUser(data.adminId, "notification", notification);
+  } catch (error) {
+    console.error("Error creating AI_ANALYSIS notification:", error);
+  }
+});
+
+eventBus.subscribe(TOPICS.AI_ANALYSIS_BATCH, async (event) => {
+  const data = event.data;
+
+  try {
+    const notification = await notificationService.createNotification({
+      userId: data.adminId,
+      userType: "admin",
+      title: data.subject,
+      message: data.content,
+      type: "INFO",
+      metadata: {},
+    });
+
+    sendToUser(data.adminId, "notification", notification);
+  } catch (error) {
+    console.error("Error creating AI_ANALYSIS_BATCH notification:", error);
+  }
+});
+
+eventBus.subscribe(TOPICS.RESUME_UPLOAD, async (event) => {
+  const data = event.data;
+  console.log(data);
+  try {
+    const notification = await notificationService.createNotification({
+      userId: data.adminId,
+      userType: "admin",
+      title: "New Job Application",
+      message: `${data.name} has applied for a job`,
+      type: "INFO",
+      metadata: {
         userId: data.userId,
-        userType: data.userType || "user",
-        title: "🎉 Welcome!",
-        message: `Hello ${data.name}! Your account has been created successfully.`,
-        type: "SUCCESS",
-        metadata: { email: data.email },
-      });
+        jobId: data.jobId,
+        name: data.name,
+        email: data.email,
+      },
+    });
 
-      sendToUser(data.userId, "notification", notification);
-    } catch (error) {
-      console.error("Error creating user registered notification:", error);
-    }
-  },
-
-  [TOPICS.RESUME_STATUS]: async (data) => {
-    console.log("📨 Resume status update:", data);
-    try {
-      const notification = await notificationService.createNotification({
-        userId: data.userId,
-        userType: "user",
-        title: data.subject,
-        message: data.message,
-        type: data.status === "shortlisted" ? "SUCCESS" : "INFO",
-        metadata: {
-          jobId: data.jobId,
-          resumeId: data.resumeId,
-          status: data.status,
-        },
-      });
-
-      sendToUser(data.userId, "notification", notification);
-    } catch (error) {
-      console.error("Error creating resume status notification:", error);
-    }
-  },
-
-  [TOPICS.AI_ANALYSIS]: async (data) => {
-    console.log("📨 AI analysis of the recipient:", data);
-    try {
-      const notification = await notificationService.createNotification({
-        userId: data.adminId,
-        userType: "admin",
-        title: data.Subject,
-        message: data.content,
-        type: "INFO",
-        metadata: {
-          applicantId: data.applicantId,
-          applicantEmail: data.applicantEmail,
-        },
-      });
-
-      sendToUser(data.adminId, "notification", notification);
-    } catch (error) {
-      console.error("Error creating AI analysis notification:", error);
-    }
-  },
-
-  [TOPICS.AI_ANALYSIS_BATCH]: async (data) => {
-    console.log("📨 AI analysis of the batch data:", data);
-    try {
-      const notification = await notificationService.createNotification({
-        userId: data.adminId,
-        userType: "admin",
-        title: data.Subject,
-        message: data.content,
-        type: "INFO",
-        metadata: {},
-      });
-
-      sendToUser(data.adminId, "notification", notification);
-    } catch (error) {
-      console.error("Error creating AI batch analysis notification:", error);
-    }
-  },
-
-  [TOPICS.RESUME_UPLOAD]: async (data) => {
-    console.log("📨 candidate has applied for job: ", data);
-    try {
-      const notification = await notificationService.createNotification({
-        userId: data.adminId,
-        userType: "admin",
-        title: "applied for a the job",
-        message: "user applied for job",
-        type: "INFO",
-        metadata: {
-          userId: data.userId,
-          jobId: data.jobId,
-          name: data.name,
-          email: data.email,
-        },
-      });
-      sendToUser(data.adminId, "notification", notification);
-    } catch (err) {
-      console.error("Error creating resume uplaod notification:", err);
-    }
-  },
+    sendToUser(data.adminId, "notification", notification);
+  } catch (error) {
+    console.error("Error creating RESUME_UPLOAD notification:", error);
+  }
 });
 
 // Routes
